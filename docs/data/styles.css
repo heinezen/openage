@@ -9,6 +9,8 @@
 }
 .box_1 {
 }
+.box_2 {
+}
 .box_3 {
 }
 .image {
@@ -16,6 +18,9 @@
 .placeholder {
 }
 .button {
+}
+.primary_button {
+  color:#FFFFFF;
 }
 .heading_1 {
   font-family:'Arial Standard', 'Arial';
@@ -64,6 +69,8 @@
 }
 .paragraph {
   text-align:left;
+}
+.flow_shape {
 }
 .line {
 }
