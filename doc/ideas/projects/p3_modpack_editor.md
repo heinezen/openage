@@ -1,15 +1,15 @@
 # Modpack Editor (Only Data)
 
-Difficulty: Hard
+**Difficulty:** Hard
 
-Mentors: heinezen, simonsan, jj
+**Mentors:** heinezen, simonsan, jj
 
-Requirements:
+**Requirements:**
 * Good programming skills in Python *or* C++
 * Familiarity with software modelling/engineering practices such as Domain Driven Design
 * Good knowledge of UI/UX design
 
-Helpful skills:
+**Helpful skills:**
 * Real-time Data and graph visualization
 * Knowledge of the openage nyan API specification
 * Knowledge about the nyan language specification
@@ -40,7 +40,7 @@ not trained in the nyan language.
 *Warning*: This is a challenging task with lots of components to consider.
 It requires dedication and learning about the connected engine components.
 If you are not afraid to work your way deeply into openage's engine components
-and fulfill the requirements, this is a task for you. However, if you
+and fulfil the requirements, this is a task for you. However, if you
 do not feel comfortable with the scope of this task, you should take a
 look at the Sprite Editor project instead.
 

@@ -1,14 +1,14 @@
 # nyan Python API
 
-Difficulty: Easy
+**Difficulty:** Easy
 
-Mentors: jj, heinezen
+**Mentors:** jj, heinezen
 
-Requirements:
+**Requirements:**
 * Basic programming skills in C++ *and* Python
 
-Helpful skills:
-* Basic programming skills in Cython (if you fulfill the requirements, learning it should be very easy)
+**Helpful skills:**
+* Basic programming skills in Cython (if you fulfil the requirements, learning it should be very easy)
 * Knowledge about the nyan language specification
 * API design
 
@@ -17,7 +17,7 @@ Helpful skills:
 Our engine uses [nyan](https://github.com/SFTtech/nyan) as a database for
 storing game relevant data such as unit attributes and configuration. The
 system uses an object-oriented approach by managing data as hierarchical
-objects with key-value pairs. nyan is custom made and tailored to fulfill
+objects with key-value pairs. nyan is custom made and tailored to fulfil
 the needs of RTS games.
 
 Currently, the main library is written in C++. This project is aimed at

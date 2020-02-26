@@ -1,15 +1,15 @@
 # Mod Manager (Package management)
 
-Difficulty: Medium
+**Difficulty:** Medium
 
-Mentors: heinezen, simonsan
+**Mentors:** heinezen, simonsan
 
-Requirements:
+**Requirements:**
 * Basic programming skills in Python *and* C++
 * Basic knowledge of cryptographic signatures and hashing
 
-Helpful skills:
-* Konwledge of package management workflows (e.g. [dpkg](https://en.wikipedia.org/wiki/Dpkg) or [apt](https://en.wikipedia.org/wiki/APT_(software)))
+**Helpful skills:**
+* Knowledge of package management workflows (e.g. [dpkg](https://en.wikipedia.org/wiki/Dpkg) or [apt](https://en.wikipedia.org/wiki/APT_(software)))
 
 ## Motivation
 
@@ -53,7 +53,7 @@ fetching from a (public) repository.
 
 The mod manager should execute basic integrity and security
 checks to prevent malicious mods from exploiting the engine's scripting
-interface to damage the user's sytem. This involves signature validation
+interface to damage the user's system. This involves signature validation
 for single modpacks and indices of public repositories. Unsigned scripts
 should be detected, flagged and deactivated.
 

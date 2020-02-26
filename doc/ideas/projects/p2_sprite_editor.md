@@ -1,14 +1,14 @@
 # Sprite Editor
 
-Difficulty: Medium
+**Difficulty:** Medium
 
-Mentors: heinezen, simonsan
+**Mentors:** heinezen, simonsan
 
-Requirements:
+**Requirements:**
 * Basic programming skills in Python *or* C++
 * Basic knowledge of UI/UX design
 
-Helpful skills:
+**Helpful skills:**
 * Image manipulation with Python scripting or libpng
 * Graphics modding experience for any sprite-based game
 
@@ -30,7 +30,7 @@ metadata.
 
 Graphics for openage are stored as (PNG) spritesheets with
 attached metadata files. The PNG spritesheet contains animation
-frames in 32-Bit color depth. For metadata, a plain-text
+frames in 32-Bit colour depth. For metadata, a plain-text
 config file that stores additional renderer settings is used.
 
 It should be noted that openage spritesheets are not purely
@@ -62,7 +62,7 @@ following:
 1. It should be able to create the PNG spritesheet from frames/images
    provided by modders.
 2. Similarly, modders should be able to create the configuration file
-   by specifiying the necessary parameters.
+   by specifying the necessary parameters.
 3. View spritesheet graphics and visualize "special" pixels. The visualization
    should include configuration file properties (layers, animation, anchor points).
 4. Edit existing configuration file parameters.
