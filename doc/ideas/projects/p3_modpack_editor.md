@@ -37,37 +37,43 @@ not trained in the nyan language.
 
 ## Description (long)
 
-* *Warning*: This is a challenging task with lots of components to consider. It requires dedication and learning about the connected engine components. If you are not afraid to work your way deeply into openage's engine components and fulfill the requirements, this is a task for you. However, if you do not feel comfortable with the scope of this task, you should take a look at the Sprite Editor project instead.
+*Warning*: This is a challenging task with lots of components to consider.
+It requires dedication and learning about the connected engine components.
+If you are not afraid to work your way deeply into openage's engine components
+and fulfill the requirements, this is a task for you. However, if you
+do not feel comfortable with the scope of this task, you should take a
+look at the Sprite Editor project instead.
 
-* Modpacks contain game data and assets used in the engine
-* Data stored as human-readable nyan files on disk
-* nyan is our object-oriented database language with is used for the openage modding API
-* Objects are plain-text definitions similar to YAML or JSON formats
+*Modpacks* refers to a collection of game data and assets used
+by the openage engine. On disk, game data is stored as human-readable
+plain-text nyan files. nyan is our database and language format
+used in the engine and the modding API. The format is very similar
+to YAMl and JSON in its definition.
 
-* openage API uses Entity Component System structure to provide an RTS interface
-* e.g. units are objects and store a list of passive/active abilities (Move, Live, Attack, Die)
-* abilities contain members for units stats (movement speed, max HP, damage)
-* by changing member values, modders are configuring their units' behavior ingame
+Game data nyan files in a modpack make use of the openage modding API for
+configuration. This API is structured as a entity component system and
+provides modders with functionality for the usual RTS features. As the API
+is the basis for openage modding, the Modpack Editor should build upon
+its structure. It is a good idea to get a good understanding of the API
+first, before writing any code.
 
-* We would like to make this modding as accessible as possible
-* However, plain-text files are not very friendly for beginners
-* Also hard to keep track of for larger modpacks
-* Modpack Editor should provide a *visual aid* to modders and make editing easier
+The preliminary goal of the Modpack Editor is to remove the need to
+edit the game data files manually and instead provide a high-level view
+for editing and creating modpacks. We would like to make modding as
+easy as possible for beginners as well as aiding more advanced users
+through an ease-of-use principle. The Modpack Editor can be understood
+as a visual aid for using the modding API.
 
-* Underlying structure is the openage modding API
-* Thus the editor must orient itself towards its structure
-* It's best that Student understands the API very well before writing any code
-* The Editor should be seen as a user-friendly, high-level interface to the API
+It is important that the Modpack Editor is sustainable long-term, i.e.
+we should be able to easily integrate API changes without a hassle.
+**Flexibility** and **modularity** is mandatory for this task. You should
+use some form of software modelling practice to ensure this such as
+Domain Driven Design.
 
-* Modpack Editor should be sustainable for long-term, i.e. the software should be maintainable to integrate new API changes
-* Might be beneficial to support different/older API versions
-* **Flexibility** and **modularity** is mandatory
-* Thus the student should use some form of software modelling practices like DDD or WAM
-
-* GUI is a very important component
-* Without good UI/UX, the modpack editor is not as powerful as we desire
-* Therefore, the student must be capable of standard UI design techniques
-* GUI design will take place at the start of the project (together with other from dev team and mentors)
+The GUI of the Modpack Editor is a very important component and should
+not be an afterthought. Without a good user experience, the editor will
+not be as powerful as we desire. Therefore, you must be capable of
+standard UI design practices.
 
 # Expected Outcome
 

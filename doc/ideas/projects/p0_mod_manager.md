@@ -28,25 +28,39 @@ as resolving problems and interdependencies.
 
 ## Description (long)
 
-* Games and mods are modpacks
-* UNIX-like package management
+In the openage eco-system, games and mods are distributed as *modpacks*.
+Modpacks are conceptualized to provide the same functionality packages
+in Linux and UNIX environments for modding purposes. Doing so gives
+modders access to several advanced features such as versioning and
+defining other mods as dependencies for their content.
 
-* Public repositories for mods
-* Updates pulled from repos automatically
-* Local installation also allowed
+As a result, the requirements of the openage mod manager are the same as
+for general package management systems. The core functionality of the
+mod manager should therefore provide these basic features:
 
-* Challenges:
-    * Conflict resolving
-    * Dependency management
-    * Load order management
-* At the end, the mod manager should provide a configuration of mods for the engine to load
+1. Modpack installation and configuration
+2. Conflict resolving
+3. Dependency management
+4. Load order management
+5. Updating mods to newer versions
 
-* Address basic security checks
-* Signature validation for single modpacks (MANIFEST file) and repos (RELEASE file)
-* Searching for unsigned scripts (security issues)
+It is the responsibility of the mod manager to automate these tasks and
+create a configuration of modpacks that is safe for the engine to load.
 
-* Launcher integration is optional, since launcher is not finished
-* GUI can be designed by student if they have time and skill
+Regarding modpack installation, the mod manager should be able to
+handle the two main installation methods: Local installation and
+fetching from a (public) repository.
+
+The mod manager should execute basic integrity and security
+checks to prevent malicious mods from exploiting the engine's scripting
+interface to damage the user's sytem. This involves signature validation
+for single modpacks and indices of public repositories. Unsigned scripts
+should be detected, flagged and deactivated.
+
+It is recommended to design the command-line interface of the mod manager
+first and add a GUI for the launcher later on. However, if you have time
+and skill to create a user interface for the mod manager, you can design
+CLI and GUI in parallel.
 
 ## Expected Outcome
 
