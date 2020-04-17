@@ -144,8 +144,7 @@ class Texture(exportable.Exportable):
             raise Exception("cannot create Texture "
                             "from unknown source type: %s" % (type(input_data)))
 
-        self.image_data, (self.width, self.height), self.image_metadata\
-            = merge_frames(frames)
+        self.image_data = frames
 
     def _slp_to_subtextures(self, frame, main_palette, player_palette=None,
                             custom_cutter=None):
@@ -209,15 +208,20 @@ class Texture(exportable.Exportable):
         # without the dot
         ext = ext[1:]
 
-        # generate PNG file
-        with targetdir[filename].open("wb") as imagefile:
-            self.image_data.get_pil_image().save(imagefile, ext)
+        index = 0
+        for frame in self.image_data:
+            output_name = "%s_%s.%s" % (basename, str(index), ext)
+            # generate PNG file
+            with targetdir[output_name].open("wb") as imagefile:
+                frame.get_pil_image().save(imagefile, ext)
 
-        if meta_formats:
-            # generate formatted texture metadata
-            formatter = data_formatter.DataFormatter()
-            formatter.add_data(self.dump(basename))
-            formatter.export(targetdir, meta_formats)
+            if meta_formats:
+                # generate formatted texture metadata
+                formatter = data_formatter.DataFormatter()
+                formatter.add_data(self.dump(basename))
+                formatter.export(targetdir, meta_formats)
+
+            index += 1
 
     def dump(self, filename):
         return [data_definition.DataDefinition(self,
