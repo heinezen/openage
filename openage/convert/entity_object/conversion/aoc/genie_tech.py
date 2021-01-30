@@ -234,7 +234,7 @@ class UnitLineUpgrade(GenieTechEffectBundleGroup):
         """
         Returns the line that is upgraded.
         """
-        return self.data.unit_lines_vertical_ref[self.unit_line_id]
+        return self.data.unit_lines[self.unit_line_id]
 
     def get_upgrade_target_id(self):
         """
@@ -329,7 +329,7 @@ class UnitUnlock(GenieTechEffectBundleGroup):
         """
         Returns the line that is unlocked by this tech.
         """
-        return self.data.unit_lines_vertical_ref[self.line_id]
+        return self.data.unit_lines[self.line_id]
 
     def __repr__(self):
         return f"UnitUnlock<{self.get_id()}>"
@@ -344,14 +344,14 @@ class BuildingUnlock(GenieTechEffectBundleGroup):
     will be created.
     """
 
-    __slots__ = ('head_unit_id',)
+    __slots__ = ('line_id',)
 
-    def __init__(self, tech_id, head_unit_id, full_data_set):
+    def __init__(self, tech_id, line_id, full_data_set):
         """
         Creates a new Genie tech group object.
 
         :param tech_id: The internal tech_id from the .dat file.
-        :param head_unit_id: The id of the unlocked line.
+        :param line_id: The id of the unlocked line.
         :param full_data_set: GenieObjectContainer instance that
                               contains all relevant data for the conversion
                               process.
@@ -359,19 +359,19 @@ class BuildingUnlock(GenieTechEffectBundleGroup):
 
         super().__init__(tech_id, full_data_set)
 
-        self.head_unit_id = head_unit_id
+        self.line_id = line_id
 
     def get_line_id(self):
         """
         Returns the ID of the line that is unlocked by this tech.
         """
-        return self.head_unit_id
+        return self.line_id
 
     def get_unlocked_line(self):
         """
         Returns the line that is unlocked by this tech.
         """
-        return self.data.building_lines[self.head_unit_id]
+        return self.data.building_lines[self.line_id]
 
     def __repr__(self):
         return f"BuildingUnlock<{self.get_id()}>"

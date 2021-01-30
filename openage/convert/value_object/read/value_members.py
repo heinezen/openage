@@ -383,7 +383,7 @@ class ArrayMember(ValueMember):
     def __init__(self, name, allowed_member_type, members):
         super().__init__(name)
 
-        self.value = members
+        self.value = tuple(members)
 
         self._allowed_member_type = allowed_member_type
 

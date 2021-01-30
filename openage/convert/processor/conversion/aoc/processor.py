@@ -128,20 +128,21 @@ class AoCProcessor:
 
         info("Creating API-like objects...")
 
-        cls.create_unit_lines(full_data_set)
-        cls.create_extra_unit_lines(full_data_set)
-        cls.create_building_lines(full_data_set)
+        # cls.create_unit_lines(full_data_set)
+        # cls.create_building_lines(full_data_set)
+        cls.create_terrain_groups(full_data_set)
+        cls.create_tech_groups_new(full_data_set)
+        cls.create_entity_lines(full_data_set)
         cls.create_villager_groups(full_data_set)
+        cls.create_extra_unit_lines(full_data_set)
         cls.create_ambient_groups(full_data_set)
         cls.create_variant_groups(full_data_set)
-        cls.create_terrain_groups(full_data_set)
-        cls.create_tech_groups(full_data_set)
         cls.create_node_tech_groups(full_data_set)
         cls.create_civ_groups(full_data_set)
 
         info("Linking API-like objects...")
 
-        cls.link_building_upgrades(full_data_set)
+        # cls.link_building_upgrades(full_data_set)
         cls.link_creatables(full_data_set)
         cls.link_researchables(full_data_set)
         cls.link_civ_uniques(full_data_set)
@@ -450,6 +451,310 @@ class AoCProcessor:
             full_data_set.genie_terrains.update({terrain.get_id(): terrain})
 
             index += 1
+
+    @staticmethod
+    def create_tech_groups_new(full_data_set):
+        """
+        Create tech groups from techs.
+
+        :param full_data_set: GenieObjectContainer instance that
+                              contains all relevant data for the conversion
+                              process.
+        :type full_data_set: class: ...dataformat.aoc.genie_object_container.GenieObjectContainer
+        """
+        genie_techs = full_data_set.genie_techs
+
+        # IDs of units/buildings that are actually used in the game
+        # TODO: We can skip these if we ever convert every individual unit
+        used_unit_ids = full_data_set.unit_connections.keys()
+        used_building_ids = full_data_set.building_connections.keys()
+        used_tech_ids = full_data_set.tech_connections.keys()
+
+        for tech_id, tech in genie_techs.items():
+            # Test if a tech exist and skip it if it doesn't
+            required_techs = tech["required_techs"].get_value()
+            if all(required_tech.get_value() == 0 for required_tech in required_techs):
+                # If all required techs are tech ID 0, the tech doesnt exist
+                continue
+
+            effect_bundle_id = tech["tech_effect_id"].get_value()
+
+            # Skip techs that don't do anything; these are handled later
+            # (usually these are initiated by buildings)
+            if effect_bundle_id == -1:
+                continue
+
+            effect_bundle = full_data_set.genie_effect_bundles[effect_bundle_id]
+
+            # Ignore techs without effects
+            if len(effect_bundle.get_effects()) == 0:
+                continue
+
+            # Search through effects and check if this is a special upgrade
+            # (age up or unit/building unlock or unit/building upgrade)
+            upgrade_found = False
+            effects = effect_bundle.get_effects()
+            for effect in effects:
+                if effect.get_type() == 1 and effect["attr_a"].get_value() == 6:
+                    # Sets the age resource, so it's an age upgrade
+                    age_id = int(effect["attr_d"].get_value())
+                    age_up = AgeUpgrade(tech_id, age_id, full_data_set)
+                    full_data_set.tech_groups.update({age_up.get_id(): age_up})
+                    full_data_set.age_upgrades.update({age_up.get_id(): age_up})
+                    upgrade_found = True
+
+                elif effect.get_type() == 2:
+                    # Unlock techs
+                    unit_id = effect["attr_a"].get_value()
+
+                    if unit_id in used_unit_ids:
+                        unit_unlock = UnitUnlock(tech_id, unit_id, full_data_set)
+                        full_data_set.tech_groups.update({unit_unlock.get_id(): unit_unlock})
+                        full_data_set.unit_unlocks.update({unit_unlock.get_id(): unit_unlock})
+                        upgrade_found = True
+
+                    if unit_id in used_building_ids:
+                        building_unlock = BuildingUnlock(tech_id, unit_id, full_data_set)
+                        full_data_set.tech_groups.update({building_unlock.get_id(): building_unlock})
+                        full_data_set.building_unlocks.update({building_unlock.get_id(): building_unlock})
+                        upgrade_found = True
+
+                elif effect.get_type() == 3:
+                    # Upgrade techs
+                    line_id = effect["attr_a"].get_value()
+                    target_unit_id = effect["attr_b"].get_value()
+
+                    if target_unit_id in used_unit_ids:
+                        unit_upgrade = UnitLineUpgrade(tech_id,
+                                                       line_id,
+                                                       target_unit_id,
+                                                       full_data_set)
+                        full_data_set.tech_groups.update({unit_upgrade.get_id(): unit_upgrade})
+                        full_data_set.unit_upgrades.update({unit_upgrade.get_id(): unit_upgrade})
+                        upgrade_found = True
+
+                    if target_unit_id in used_building_ids:
+                        building_upgrade = BuildingLineUpgrade(tech_id,
+                                                               line_id,
+                                                               target_unit_id,
+                                                               full_data_set)
+                        full_data_set.tech_groups.update({building_upgrade.get_id(): building_upgrade})
+                        full_data_set.building_upgrades.update({building_upgrade.get_id(): building_upgrade})
+                        upgrade_found = True
+
+                if upgrade_found:
+                    break
+
+            # If we found nothing special, but the tech ID is in the tech connections
+            # it is a normal stat upgrade
+            if not upgrade_found and tech_id in used_tech_ids:
+                stat_up = StatUpgrade(tech_id, full_data_set)
+                full_data_set.tech_groups.update({stat_up.get_id(): stat_up})
+                full_data_set.stat_upgrades.update({stat_up.get_id(): stat_up})
+
+        # Initiated techs are stored with buildings
+        genie_units = full_data_set.genie_units
+        for genie_unit in genie_units.values():
+            if not genie_unit.has_member("research_id"):
+                continue
+
+            building_id = genie_unit["id0"].get_value()
+            initiated_tech_id = genie_unit["research_id"].get_value()
+
+            if initiated_tech_id == -1:
+                continue
+
+            if building_id not in full_data_set.building_connections.keys():
+                # Skips buildings upgraded by age ups (which initiate the same techs)
+                continue
+
+            initiated_tech = InitiatedTech(initiated_tech_id, building_id, full_data_set)
+            full_data_set.tech_groups.update({initiated_tech.get_id(): initiated_tech})
+            full_data_set.initiated_techs.update({initiated_tech.get_id(): initiated_tech})
+
+    @staticmethod
+    def create_entity_lines(full_data_set):
+        """
+        Sort units/buildings into lines, based on information from techs and civs.
+
+        :param full_data_set: GenieObjectContainer instance that
+                              contains all relevant data for the conversion
+                              process.
+        :type full_data_set: class: ...dataformat.aoc.genie_object_container.GenieObjectContainer
+        """
+        # Store the head (= first) unit of each line
+        unit_line_heads = []
+        building_line_heads = []
+
+        used_unit_ids = full_data_set.unit_connections.keys()
+        used_building_ids = full_data_set.building_connections.keys()
+
+        # Search a player civ (british) for the starting units/buildings, i.e. units that
+        # are unlocked by default
+        player_civ_units = full_data_set.genie_civs[1]["units"].get_value()
+        for raw_unit in player_civ_units.values():
+            unit_id = raw_unit["id0"].get_value()
+            enabled = raw_unit["enabled"].get_value()
+
+            if enabled:
+                if unit_id in used_unit_ids:
+                    unit_line_heads.append(full_data_set.genie_units[unit_id])
+
+                elif unit_id in used_building_ids:
+                    building_line_heads.append(full_data_set.genie_units[unit_id])
+
+        # All other lines are unlocked through a tech
+        unit_unlocks = full_data_set.unit_unlocks
+        for unit_unlock in unit_unlocks.values():
+            line_id = unit_unlock.get_line_id()
+            unit_line_heads.append(full_data_set.genie_units[line_id])
+
+            # Check if the tech unlocks other lines
+            unlock_effects = unit_unlock.get_effects(effect_type=2)
+            for unlock_effect in unlock_effects:
+                if line_id == unlock_effect["attr_a"].get_value():
+                    # Do not append the line we already found
+                    continue
+
+                line_id = unlock_effect["attr_a"].get_value()
+
+                if line_id in used_unit_ids:
+                    unit_line_heads.append(full_data_set.genie_units[line_id])
+
+        # Create the lines from the line heads
+        for entity in unit_line_heads:
+            entity_id = entity["id0"].get_value()
+
+            if entity.has_member("task_group") and\
+                    entity["task_group"].get_value() > 0:
+                # Villager
+                # done somewhere else because they are special^TM
+                continue
+
+            elif entity.has_member("transform_unit_id")\
+                    and entity["transform_unit_id"].get_value() > -1:
+                # Trebuchet
+                unit_line = GenieUnitTransformGroup(entity_id, entity_id, full_data_set)
+                unit_line.add_unit(entity)
+                full_data_set.transform_groups.update({unit_line.get_id(): unit_line})
+
+            elif entity_id == 125:
+                # Monks
+                # Switch to monk with relic (ID=286) is hardcoded :(
+                unit_line = GenieMonkGroup(entity_id, entity_id, 286, full_data_set)
+                unit_line.add_unit(entity)
+                full_data_set.monk_groups.update({unit_line.get_id(): unit_line})
+
+            else:
+                # Everything else is a normal line
+                unit_line = GenieUnitLineGroup(entity_id, full_data_set)
+                unit_line.add_unit(entity)
+
+            full_data_set.unit_lines.update({unit_line.get_id(): unit_line})
+            # Store which unit is part of which line
+            full_data_set.unit_ref.update({entity_id: unit_line})
+
+        # Append upgraded units to their line
+        unit_upgrades = full_data_set.unit_upgrades
+        for unit_upgrade in unit_upgrades.values():
+            line_id = unit_upgrade.get_line_id()
+            target_id = unit_upgrade.get_upgrade_target_id()
+            unit = full_data_set.genie_units[target_id]
+
+            # Find the previous unit in the line
+            unit_connection = full_data_set.unit_connections[target_id]
+            other_connection_ids = unit_connection["other_connected_ids"].get_value()
+            other_connections = unit_connection["other_connections"].get_value()
+            for idx, connected_item in enumerate(other_connections):
+                if connected_item["other_connection"].get_value() == 2:
+                    source_id = other_connection_ids[idx].get_value()
+                    break
+
+            unit_line = full_data_set.unit_lines[line_id]
+            unit_line.add_unit(unit, after=source_id)
+            full_data_set.unit_ref.update({target_id: unit_line})
+
+        # Create the building lines
+        building_unlocks = full_data_set.building_unlocks
+        for building_unlock in building_unlocks.values():
+            line_id = building_unlock.get_line_id()
+            building_line_heads.append(full_data_set.genie_units[line_id])
+
+            # Check if the tech unlocks other lines
+            unlock_effects = building_unlock.get_effects(effect_type=2)
+            for unlock_effect in unlock_effects:
+                if line_id == unlock_effect["attr_a"].get_value():
+                    # Do not append the line we already found
+                    continue
+
+                line_id = unlock_effect["attr_a"].get_value()
+
+                if line_id in used_building_ids:
+                    building_line_heads.append(full_data_set.genie_units[line_id])
+
+        for entity in building_line_heads:
+            entity_id = entity["id0"].get_value()
+
+            if entity.has_member("stack_unit_id") and \
+                    entity["stack_unit_id"].get_value() > -1:
+                # Town Center
+                # Use the stack unit ID here because that gets reference by other data
+                stack_unit_id = entity["stack_unit_id"].get_value()
+                building_line = GenieStackBuildingGroup(stack_unit_id, entity_id, full_data_set)
+
+                # Update the unlock tech to link to the stack unit id
+                enabling_tech_id = building_line.get_enabling_research_id()
+                if enabling_tech_id > -1:
+                    full_data_set.building_unlocks[enabling_tech_id].line_id = stack_unit_id
+
+            else:
+                building_line = GenieBuildingLineGroup(entity_id, full_data_set)
+
+            building_line.add_unit(entity)
+            full_data_set.building_lines.update({building_line.get_id(): building_line})
+            full_data_set.unit_ref.update({entity_id: building_line})
+
+        # Append upgraded buildings to their line
+        building_upgrades = full_data_set.building_upgrades
+        for building_upgrade in building_upgrades.values():
+            line_id = building_upgrade.get_line_id()
+            target_id = building_upgrade.get_upgrade_target_id()
+            unit = full_data_set.genie_units[target_id]
+
+            # Find the previous building in the line
+            required_techs = building_upgrade.tech["required_techs"].get_value()
+            for required_tech in required_techs:
+                required_tech_id = required_tech.get_value()
+                if required_tech_id in full_data_set.building_unlocks.keys():
+                    source_id = full_data_set.building_unlocks[required_tech_id].get_line_id()
+                    break
+
+                if required_tech_id in full_data_set.building_upgrades.keys():
+                    source_id = full_data_set.building_upgrades[required_tech_id].get_upgrade_target_id()
+                    break
+
+            building_line = full_data_set.building_lines[line_id]
+            building_line.add_unit(unit, after=source_id)
+            full_data_set.unit_ref.update({target_id: building_line})
+
+        # Upgraded units/buildings through age ups
+        age_ups = full_data_set.age_upgrades
+        for age_up in age_ups.values():
+            effects = age_up.get_effects(effect_type=3)
+            for effect in effects:
+                source_id = effect["attr_a"].get_value()
+                target_id = effect["attr_b"].get_value()
+                unit = full_data_set.genie_units[target_id]
+
+                if source_id in full_data_set.building_lines.keys():
+                    building_line = full_data_set.building_lines[source_id]
+                    building_line.add_unit(unit, after=source_id)
+                    full_data_set.unit_ref.update({target_id: building_line})
+
+                elif source_id in full_data_set.unit_lines.keys():
+                    unit_line = full_data_set.unit_lines[source_id]
+                    unit_line.add_unit(unit, after=source_id)
+                    full_data_set.unit_ref.update({target_id: unit_line})
 
     @staticmethod
     def create_unit_lines(full_data_set):
@@ -803,7 +1108,6 @@ class AoCProcessor:
             required_research_id = connection["required_research"].get_value()
             enabling_research_id = connection["enabling_research"].get_value()
             line_mode = connection["line_mode"].get_value()
-            line_id = connection["vertical_line"].get_value()
 
             if required_research_id == -1 and enabling_research_id == -1:
                 # Unit is unlocked from the start
@@ -811,19 +1115,34 @@ class AoCProcessor:
 
             if line_mode == 2:
                 # Unit is first in line, there should be an unlock tech id
-                # Tjis is usually the enabling tech id
+                # This is usually the enabling tech id
                 unlock_tech_id = enabling_research_id
                 if unlock_tech_id == -1:
-                    # Battle elephant is a curious exception wher it's the required tech id
+                    # Battle elephant is a curious exception where it's the required tech id
                     unlock_tech_id = required_research_id
 
-                unit_unlock = UnitUnlock(unlock_tech_id, line_id, full_data_set)
+                unit_unlock = UnitUnlock(unlock_tech_id, unit_id, full_data_set)
                 full_data_set.tech_groups.update({unit_unlock.get_id(): unit_unlock})
                 full_data_set.unit_unlocks.update({unit_unlock.get_id(): unit_unlock})
 
             elif line_mode == 3:
                 # Units further down the line receive line upgrades
-                unit_upgrade = UnitLineUpgrade(required_research_id, line_id,
+
+                # Find the unit line that is upgraded
+                upgrade_source_id = -1
+                source_connection = connection
+                while source_connection["line_mode"].get_value() != 2:
+                    # Check connections recursively until the first unit id in the line is found
+                    other_connection_ids = source_connection["other_connected_ids"].get_value()
+                    other_connections = source_connection["other_connections"].get_value()
+                    for idx, connected_item in enumerate(other_connections):
+                        if connected_item["other_connection"].get_value() == 2:
+                            upgrade_source_id = other_connection_ids[idx].get_value()
+                            break
+
+                    source_connection = full_data_set.unit_connections[upgrade_source_id]
+
+                unit_upgrade = UnitLineUpgrade(required_research_id, upgrade_source_id,
                                                unit_id, full_data_set)
                 full_data_set.tech_groups.update({unit_upgrade.get_id(): unit_upgrade})
                 full_data_set.unit_upgrades.update({unit_upgrade.get_id(): unit_upgrade})
