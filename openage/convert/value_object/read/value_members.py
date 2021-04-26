@@ -1,4 +1,4 @@
-# Copyright 2019-2020 the openage authors. See copying.md for legal info.
+# Copyright 2019-2021 the openage authors. See copying.md for legal info.
 # TODO pylint: disable=C,R,abstract-method
 
 """
@@ -24,6 +24,7 @@ Quick usage guide on when to use which ValueMember:
 
 from enum import Enum
 from math import isclose
+from openage.convert.value_object.read.member_access import READ_GEN
 
 
 class ValueMember:
@@ -371,6 +372,78 @@ class ContainerMember(ValueMember):
 
     def __repr__(self):
         return f"ContainerMember<{self.name}>"
+
+
+class OffsetContainerMember(ContainerMember):
+    """
+    ContainerMember that does loads its data when necessary from an offset
+    in the data file.
+    """
+
+    __slots__ = ('offset', 'struct', 'raw_data', 'game_version', '_loaded')
+
+    def __init__(self, name, offset, struct, raw, game_version):
+        """
+        :param offset: Offset of the structure in the data file.
+        :type offset: int
+        :param struct: GenieStructure class that defines the data format.
+        :type struct: GenieStructure
+        :param raw: File bytes from which the container member is loaded.
+        :param game_version: Game version of the data file.
+        """
+        super().__init__(name, {})
+
+        self.offset = offset
+        self.struct = struct
+        self.raw_data = raw
+        self.game_version = game_version
+
+        self._loaded = False
+
+    def load(self):
+        """
+        Loads the container members.
+        """
+        if self._loaded:
+            return
+
+        members = self.struct.read(self.raw_data, self.offset, self.game_version)
+        self._create_dict(members)
+        self._loaded = True
+
+    def unload(self):
+        """
+        Unloads the container members.
+        """
+        del self.value
+        self.value = {}
+
+    def diff(self, other):
+        if self._loaded:
+            return super().diff(self, other)
+
+        self.load()
+        diff = super().diff(self, other)
+        self.unload()
+        return diff
+
+    def __getitem__(self, key):
+        if self._loaded:
+            return super()[key]
+
+        self.load()
+        item = super()[key]
+        self.unload()
+        return item
+
+    def __len__(self):
+        if not self._loaded:
+            return len(self.struct.get_data_format(self.game_version, (READ_GEN,)))
+
+        return len(self.value)
+
+    def __repr__(self):
+        return f"OffsetContainerMember<{self.name}>"
 
 
 class ArrayMember(ValueMember):
