@@ -137,7 +137,10 @@ def main(argv=None):
     args = cli.parse_args(argv)
 
     if sys.platform == 'win32':
-        add_dll_search_paths(args.dll_paths)
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        if os.path.isdir(os.path.join(root, 'dll')):
+            add_dll_search_paths([os.path.join(root, 'dll')])
 
     if args.print_version:
         print_version()

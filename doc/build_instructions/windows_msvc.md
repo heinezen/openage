@@ -34,6 +34,8 @@ __NOTE:__ You need to manually make sure and doublecheck if the system you are b
 
  - [CMake](https://cmake.org/download/)
 
+  _Note:_ If you want the easy solution for download other deps, you can download with by executing "install_deps.ps1" in powershell
+
 ### Python Modules
  Open a command prompt at `<Python 3 installation directory>/Scripts`
 
@@ -54,6 +56,18 @@ _Note:_ Also ensure that `python` and `python3` both point to the correct and th
  _Note:_ If you are planning to build the 64-bit version of openage, you are going to need 64-bit libraries.
  Add command line option `--triplet x64-windows` to the above command or add the environment variable `VCPKG_DEFAULT_TRIPLET=x64-windows` to build x64 libraries. [See here](https://github.com/Microsoft/vcpkg/issues/1254)
 
+  _Note:_ If you have error with it like `CMake Error at scripts/cmake/vcpkg_acquire_msys.cmake:229 (file): file failed to extract:` or a disc in exFAT you can download with this command in powershell
+  ```powershell
+  mkdir download
+  cd download
+  $zipfile = "openage-dep-x64-windows.zip"
+  Invoke-WebRequest https://github.com/SFTtech/openage-dependencies/releases/download/v0.5.0/openage-dep-x64-windows.zip -OutFile $zipfile
+  Expand-Archive -Path $zipfile -DestinationPath . -Force
+  Remove-Item $zipfile
+  (Get-ChildItem . -Recurse -File).FullName
+  ```
+  and then add `-DCMAKE_TOOLCHAIN_FILE=<pathToDownloadDir>` to the cmake configure command.
+
 <!---
 __NOTE:__ You can also download the pre-built vcpkg dependencies (without Qt) [from this repository](https://github.com/simonsan/openage-win-dependencies/releases).
 -->
@@ -62,7 +76,21 @@ __NOTE:__ You can also download the pre-built vcpkg dependencies (without Qt) [f
  Note that openage doesn't support completely out-of-source-tree builds yet.
  We will, however, use a separate `build` directory to build the binaries.
 
+_Note:_ If you have download dependencies with "install_deps.ps1" you can just run "compile.ps1" in powershell
+
 _Note:_ You will also need to set up [the dependencies for Nyan](https://github.com/SFTtech/nyan/blob/master/doc/building.md#windows), which is mainly [flex](https://sourceforge.net/projects/winflexbison/)
+_Note:_ If you can't download flex, you can download with this command in powershell
+```powershell
+mkdir download
+cd download
+$zipfile = "winflexbison-2.5.24.zip"
+Invoke-WebRequest https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip -OutFile $zipfile
+mkdir winflexbison
+Expand-Archive -Path $zipfile -DestinationPath ./winflexbison -Force
+Remove-Item $zipfile
+(Get-ChildItem ./winflexbison -Recurse -File).FullName
+```
+then add `-DFLEX_EXECUTABLE=path/to/win_flex.exe` to the cmake configure command.
 
 Open a command prompt at `<openage directory>`:
 
@@ -70,6 +98,8 @@ Open a command prompt at `<openage directory>`:
      cd build
      cmake -DCMAKE_TOOLCHAIN_FILE=<vcpkg directory>\scripts\buildsystems\vcpkg.cmake ..
      cmake --build . --config RelWithDebInfo -- /nologo /m /v:m
+
+_Note:_ if not work try `cmake -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='/Zc:__cplusplus /permissive- /EHsc' -DCMAKE_EXE_LINKER_FLAGS='' -DCMAKE_MODULE_LINKER_FLAGS='' -DCMAKE_SHARED_LINKER_FLAGS='' -DDOWNLOAD_NYAN=YES -DCXX_OPTIMIZATION_LEVEL=auto -DCXX_SANITIZE_FATAL=False -DCXX_SANITIZE_MODE=none -DWANT_BACKTRACE=if_available -DWANT_GPERFTOOLS_PROFILER=if_available -DWANT_GPERFTOOLS_TCMALLOC=False -DWANT_INOTIFY=if_available -DWANT_NCURSES=if_available -DWANT_OPENGL=if_available -DWANT_VULKAN=if_available -G "Visual Studio 16 2019" -A x64 ..` it's the complete command from the CI
 
 _Note:_ If you want to build the x64 version, please add `-G "Visual Studio 17 2022" -A x64` (for VS2022) to the first cmake command.
 
@@ -95,6 +125,24 @@ _Note:_ If you want to download and build Nyan automatically add `-DDOWNLOAD_NYA
   - Now, to run the openage:
     - Open a CMD window in `<openage directory>\build\` and run `python -m openage game`
     - Execute`<openage directory>\build\run.exe` every time after that and enjoy!
+
+_Note:_ you can just run this command in powershell to create a package folder with all the needed files
+```powershell
+mkdir package
+cd package
+mkdir dll
+cd ..
+$STAGING_PATH = Resolve-Path package
+$DLL_PATH = Join-Path package dll | Resolve-Path
+cd build
+$NYAN_DLL = (Get-ChildItem . -Recurse -Force -Filter 'nyan.dll')[0].FullName
+$OPENAGE_DLL = (Get-ChildItem . -Recurse -Force -Filter 'openage.dll')[0].FullName
+$NATIVE_OUTPUT = Split-Path -Path $OPENAGE_DLL -Parent
+Copy-Item -Path ./openage -Destination $STAGING_PATH -Recurse
+Copy-Item -Path $NYAN_DLL -Destination $DLL_PATH
+Copy-Item -Path (Join-Path $NATIVE_OUTPUT *.dll) -Destination $DLL_PATH
+Copy-Item -Path run.* -Destination $STAGING_PATH
+```
 
 ## Packaging
 
