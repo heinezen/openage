@@ -14,6 +14,7 @@ We wrap `CMake` with an optional `configure` wrapper script.
 You can build the project like a regular `CMake` project.
 
 For more build system internals, see [doc/buildsystem.md](/doc/buildsystem.md).
+For [windows](build_instructions/windows/windows_msvc.md).
 
 ## Dependencies
 
@@ -85,7 +86,7 @@ described below for some of the most common ones:
 - [Arch Linux](build_instructions/arch_linux.md)
 - [FreeBSD](build_instructions/freebsd.md)
 - [Gentoo](build_instructions/gentoo.md)
-- [Microsoft Windows](build_instructions/windows_msvc.md)
+- [Microsoft Windows](build_instructions/windows/windows_msvc.md)
 
 
 ### nyan installation

@@ -22,6 +22,6 @@ $FLEX_PATH = (Get-ChildItem ./download -Recurse -Force -Filter 'win_flex.exe')[0
 cd nyan
 mkdir build
 cd build
-cmake .. -DFLEX_EXECUTABLE="$FLEX_PATH" -G "Visual Studio 16 2019"
+cmake .. -DFLEX_EXECUTABLE="$FLEX_PATH"
 cmake --build . --config RelWithDebInfo
 cd ../..

@@ -15,6 +15,8 @@ import shlex
 import shutil
 import subprocess
 import sys
+import requests
+import zipfile
 
 if sys.version_info < (3, 9):
     print("openage requires Python 3.9 or higher")
@@ -75,6 +77,24 @@ OPTIONS = {
     "gperftools-profiler": "if_available",
     "ncurses": "if_available"
 }
+
+def download_windows_depencies():
+    if not os.path.isdir("download"):
+        os.mkdir("download")
+    
+    # dowload the last release zip
+    zip_name = "openage-dep-x64-windows.zip"
+    zip_path = os.path.join("download", zip_name)
+    link = "https://github.com/SFTtech/openage-dependencies/releases/latest/download/openage-dep-x64-windows.zip"
+    file = open(zip_path, "wb")
+    file.write(requests.get(link).content)
+    file.close()
+
+    # extract zip
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall("download")
+    
+    os.remove(zip_path)
 
 
 def features(args, parser):
@@ -337,6 +357,9 @@ def main(args, parser):
 
     defines = {}
 
+    if args.download_windows_depencies:
+        download_windows_depencies
+
     options = features(args, parser)
     defines.update(build_type(args))
     defines.update(get_compiler(args, parser))
@@ -413,6 +436,10 @@ def parse_args():
                      help="emit clang-tidy analysis messages")
     cli.add_argument("--download-nyan", action="store_true",
                      help="enable automatic download of the nyan project")
+    cli.add_argument("--force-download-nyan", action="store_true",
+                     help="alternative way to download nyan (mostly for windows)")
+    cli.add_argument("--download-windows-depencies", action="store_true",
+                     help="create a folder download with all dependencies")
 
     # arguments after -- are used as raw cmake args
     cli.add_argument('raw_cmake_args', nargs=argparse.REMAINDER, default=[],

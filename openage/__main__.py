@@ -141,6 +141,8 @@ def main(argv=None):
         
         if os.path.isdir(os.path.join(root, 'dll')):
             add_dll_search_paths([os.path.join(root, 'dll')])
+        
+        add_dll_search_paths(args.dll_paths)
 
     if args.print_version:
         print_version()
