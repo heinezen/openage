@@ -5,7 +5,7 @@
 from enum import Enum
 import lz4.block
 import numpy
-from struct import Struct, unpack_from
+from struct import Struct
 
 from .....log import spam, dbg
 
@@ -44,7 +44,6 @@ cdef enum pixel_type:
     color_transparent   # transparent pixel
     color_player        # non-outline player color pixel
     color_player_v4     # non-outline player color pixel
-    color_black         # black outline pixel
     color_special_1     # player color outline pixel
     color_special_2     # black outline pixel
 
@@ -179,7 +178,7 @@ class SLP:
                                    i * SLP.slp_frame_info.size)
 
             frame_info = FrameInfo(*SLP.slp_frame_info.unpack_from(
-                data, frame_header_offset), self.version, slp_standard)
+                data, frame_header_offset), self.version, slp_type.slp_standard)
             spam(frame_info)
 
             if frame_info.properties & 0x07 == 0x07:
@@ -202,7 +201,7 @@ class SLP:
                                        i * SLP.slp_frame_info.size)
 
                 frame_info = FrameInfo(*SLP.slp_frame_info.unpack_from(
-                    data, frame_header_offset), self.version, slp_shadow)
+                    data, frame_header_offset), self.version, slp_type.slp_shadow)
                 spam(frame_info)
                 self.shadow_frames.append(SLPShadowFrame(frame_info, data))
 
@@ -336,7 +335,7 @@ cdef class SLPFrame:
         cdef size_t row_count = self.info.size[1]
         self.pcolor.reserve(row_count)
 
-        # process bondary table
+        # process boundary table
         for i in range(row_count):
             outline_entry_position = (self.info.outline_table_offset + i *
                                       SLPFrame.slp_frame_row_edge.size)
@@ -383,13 +382,13 @@ cdef class SLPFrame:
         # row is completely transparent
         if bounds.full_row:
             for _ in range(pixel_count):
-                row_data.push_back(pixel(color_transparent, 0))
+                row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             return row_data
 
         # start drawing the left transparent space
         for i in range(bounds.left):
-            row_data.push_back(pixel(color_transparent, 0))
+            row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
         # process the drawing commands for this row.
         self.process_drawing_cmds(data_raw,
@@ -400,7 +399,7 @@ cdef class SLPFrame:
 
         # finish by filling up the right transparent space
         for i in range(bounds.right):
-            row_data.push_back(pixel(color_transparent, 0))
+            row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
         # verify size of generated row
         if row_data.size() != pixel_count:
@@ -525,7 +524,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                     dpos += 1
                     color = data_raw[dpos]
 
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lowest_crumb == 0b00000001:
                 # skip command
@@ -535,7 +534,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 cpack = cmd_or_next(data_raw, cmd, 2, dpos)
                 dpos = cpack.dpos
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x02:
                 # big_color_list command
@@ -548,7 +547,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 for _ in range(pixel_count):
                     dpos += 1
                     color = data_raw[dpos]
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x03:
                 # big_skip command
@@ -560,7 +559,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 pixel_count = (higher_nibble << 4) + nextbyte
 
                 for _ in range(pixel_count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x06:
                 # player_color_list command
@@ -573,7 +572,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                     dpos += 1
                     color = data_raw[dpos]
 
-                    row_data.push_back(pixel(color_player, color))
+                    row_data.push_back(pixel(pixel_type.color_player, color))
 
             elif lower_nibble == 0x07:
                 # fill command
@@ -586,7 +585,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 color = data_raw[dpos]
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x0A:
                 # fill player color command
@@ -599,7 +598,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 color = data_raw[dpos]
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_player, color))
+                    row_data.push_back(pixel(pixel_type.color_player, color))
 
             elif lower_nibble == 0x0B:
                 # shadow command
@@ -609,7 +608,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                 dpos = cpack.dpos
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_shadow, 0))
+                    row_data.push_back(pixel(pixel_type.color_shadow, 0))
 
             elif lower_nibble == 0x0E:
                 # "extended" commands. higher nibble specifies the instruction.
@@ -642,12 +641,12 @@ cdef class SLPMainFrameAoC(SLPFrame):
                     # outline_1 command
                     # the next pixel shall be drawn as special color 1,
                     # if it is obstructed later in rendering
-                    row_data.push_back(pixel(color_special_1, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x60:
                     # outline_2 command
                     # same as above, but special color 2
-                    row_data.push_back(pixel(color_special_2, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x50:
                     # outline_span_1 command
@@ -657,7 +656,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_1, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x70:
                     # outline_span_2 command
@@ -667,7 +666,7 @@ cdef class SLPMainFrameAoC(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_2, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x80:
                     # dither command
@@ -754,7 +753,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                     dpos += 1
                     color = data_raw[dpos]
 
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lowest_crumb == 0b00000001:
                 # skip command
@@ -764,7 +763,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                 cpack = cmd_or_next(data_raw, cmd, 2, dpos)
                 dpos = cpack.dpos
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x02:
                 # big_color_list command
@@ -777,7 +776,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                 for _ in range(pixel_count):
                     dpos += 1
                     color = data_raw[dpos]
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x03:
                 # big_skip command
@@ -789,7 +788,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                 pixel_count = (higher_nibble << 4) + nextbyte
 
                 for _ in range(pixel_count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x06:
                 # player_color_list command
@@ -802,7 +801,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                     color = data_raw[dpos]
 
                     # version 3.0 uses extra palettes for player colors
-                    row_data.push_back(pixel(color_player_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_player_v4, color))
 
             elif lower_nibble == 0x07:
                 # fill command
@@ -815,7 +814,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                 color = data_raw[dpos]
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x0A:
                 # fill player color command
@@ -829,7 +828,7 @@ cdef class SLPMainFrameDE(SLPFrame):
 
                 for _ in range(cpack.count):
                     # version 3.0 uses extra palettes for player colors
-                    row_data.push_back(pixel(color_player_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_player_v4, color))
 
             elif lower_nibble == 0x0B:
                 # shadow command
@@ -839,7 +838,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                 dpos = cpack.dpos
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_shadow, 0))
+                    row_data.push_back(pixel(pixel_type.color_shadow, 0))
 
             elif lower_nibble == 0x0E:
                 # "extended" commands. higher nibble specifies the instruction.
@@ -872,12 +871,12 @@ cdef class SLPMainFrameDE(SLPFrame):
                     # outline_1 command
                     # the next pixel shall be drawn as special color 1,
                     # if it is obstructed later in rendering
-                    row_data.push_back(pixel(color_special_1, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x60:
                     # outline_2 command
                     # same as above, but special color 2
-                    row_data.push_back(pixel(color_special_2, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x50:
                     # outline_span_1 command
@@ -887,7 +886,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_1, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x70:
                     # outline_span_2 command
@@ -897,7 +896,7 @@ cdef class SLPMainFrameDE(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_2, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x80:
                     # dither command
@@ -985,7 +984,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     dpos += 2
                     color = data_raw[dpos]
 
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lowest_crumb == 0b00000001:
                 # skip command
@@ -995,7 +994,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                 cpack = cmd_or_next(data_raw, cmd, 2, dpos)
                 dpos = cpack.dpos
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x02:
                 # big_color_list command
@@ -1009,7 +1008,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     dpos += 2
                     color = data_raw[dpos]
 
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x03:
                 # big_skip command
@@ -1021,7 +1020,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                 pixel_count = (higher_nibble << 4) + nextbyte
 
                 for _ in range(pixel_count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x06:
                 # player_color_list command
@@ -1034,7 +1033,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     color = data_raw[dpos]
 
                     # version 3.0 uses extra palettes for player colors
-                    row_data.push_back(pixel(color_player_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_player_v4, color))
 
             elif lower_nibble == 0x07:
                 # fill command
@@ -1047,7 +1046,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                 color = data_raw[dpos]
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_standard, color))
+                    row_data.push_back(pixel(pixel_type.color_standard, color))
 
             elif lower_nibble == 0x0A:
                 # fill player color command
@@ -1061,7 +1060,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
 
                 for _ in range(cpack.count):
                     # since version 3.0 uses extra palettes for player colors
-                    row_data.push_back(pixel(color_player_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_player_v4, color))
 
             elif lower_nibble == 0x0B:
                 # shadow command
@@ -1071,7 +1070,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                 dpos = cpack.dpos
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_shadow, 0))
+                    row_data.push_back(pixel(pixel_type.color_shadow, 0))
 
             elif lower_nibble == 0x0E:
                 # "extended" commands. higher nibble specifies the instruction.
@@ -1104,12 +1103,12 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     # outline_1 command
                     # the next pixel shall be drawn as special color 1,
                     # if it is obstructed later in rendering
-                    row_data.push_back(pixel(color_special_1, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x60:
                     # outline_2 command
                     # same as above, but special color 2
-                    row_data.push_back(pixel(color_special_2, 0))
+                    row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x50:
                     # outline_span_1 command
@@ -1119,7 +1118,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_1, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_1, 0))
 
                 elif higher_nibble == 0x70:
                     # outline_span_2 command
@@ -1129,7 +1128,7 @@ cdef class SLPMainFrameDE41(SLPFrame):
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel(color_special_2, 0))
+                        row_data.push_back(pixel(pixel_type.color_special_2, 0))
 
                 elif higher_nibble == 0x80:
                     # dither command
@@ -1218,7 +1217,7 @@ cdef class SLPShadowFrame(SLPFrame):
                     color = data_raw[dpos]
 
                     # shadows in v4.0 draw a different color
-                    row_data.push_back(pixel(color_shadow_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_shadow_v4, color))
 
             elif lowest_crumb == 0b00000001:
                 # skip command
@@ -1228,7 +1227,7 @@ cdef class SLPShadowFrame(SLPFrame):
                 cpack = cmd_or_next(data_raw, cmd, 2, dpos)
                 dpos = cpack.dpos
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x02:
                 # big_color_list command
@@ -1241,7 +1240,7 @@ cdef class SLPShadowFrame(SLPFrame):
                 for _ in range(pixel_count):
                     dpos += 1
                     color = data_raw[dpos]
-                    row_data.push_back(pixel(color_shadow_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_shadow_v4, color))
 
             elif lower_nibble == 0x03:
                 # big_skip command
@@ -1253,7 +1252,7 @@ cdef class SLPShadowFrame(SLPFrame):
                 pixel_count = (higher_nibble << 4) + nextbyte
 
                 for _ in range(pixel_count):
-                    row_data.push_back(pixel(color_transparent, 0))
+                    row_data.push_back(pixel(pixel_type.color_transparent, 0))
 
             elif lower_nibble == 0x06:
                 # player_color_list command
@@ -1266,7 +1265,7 @@ cdef class SLPShadowFrame(SLPFrame):
                     color = data_raw[dpos]
 
                     # version 3.0 uses extra palettes for player colors
-                    row_data.push_back(pixel(color_player_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_player_v4, color))
 
             elif lower_nibble == 0x07:
                 # fill command
@@ -1280,7 +1279,7 @@ cdef class SLPShadowFrame(SLPFrame):
 
                 for _ in range(cpack.count):
                     # shadows in v4.0 draw a different color
-                    row_data.push_back(pixel(color_shadow_v4, color))
+                    row_data.push_back(pixel(pixel_type.color_shadow_v4, color))
 
             else:
                 raise Exception(
@@ -1388,13 +1387,13 @@ cdef class SLPFrame32:
         # row is completely transparent
         if bounds.full_row:
             for _ in range(pixel_count):
-                row_data.push_back(pixel32(color_transparent, 0, 0, 0, 0))
+                row_data.push_back(pixel32(pixel_type.color_transparent, 0, 0, 0, 0))
 
             return row_data
 
         # start drawing the left transparent space
         for i in range(bounds.left):
-            row_data.push_back(pixel32(color_transparent, 0, 0, 0, 0))
+            row_data.push_back(pixel32(pixel_type.color_transparent, 0, 0, 0, 0))
 
         # process the drawing commands for this row.
         self.process_drawing_cmds(data_raw,
@@ -1405,7 +1404,7 @@ cdef class SLPFrame32:
 
         # finish by filling up the right transparent space
         for i in range(bounds.right):
-            row_data.push_back(pixel32(color_transparent, 0, 0, 0, 0))
+            row_data.push_back(pixel32(pixel_type.color_transparent, 0, 0, 0, 0))
 
         # verify size of generated row
         if row_data.size() != pixel_count:
@@ -1484,7 +1483,7 @@ cdef class SLPFrame32:
                         dpos += 1
                         pixel_data.push_back(data_raw[dpos])
 
-                    row_data.push_back(pixel32(color_standard,
+                    row_data.push_back(pixel32(pixel_type.color_standard,
                                                pixel_data[2],
                                                pixel_data[1],
                                                pixel_data[0],
@@ -1499,7 +1498,7 @@ cdef class SLPFrame32:
                 cpack = cmd_or_next(data_raw, cmd, 2, dpos)
                 dpos = cpack.dpos
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel32(color_transparent, 0, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_transparent, 0, 0, 0, 0))
 
             elif lower_nibble == 0x02:
                 # big_color_list command
@@ -1513,7 +1512,7 @@ cdef class SLPFrame32:
                         dpos += 1
                         pixel_data.push_back(data_raw[dpos])
 
-                    row_data.push_back(pixel32(color_standard,
+                    row_data.push_back(pixel32(pixel_type.color_standard,
                                                pixel_data[2],
                                                pixel_data[1],
                                                pixel_data[0],
@@ -1531,7 +1530,7 @@ cdef class SLPFrame32:
                 pixel_count = (higher_nibble << 4) + nextbyte
 
                 for _ in range(pixel_count):
-                    row_data.push_back(pixel32(color_transparent, 0, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_transparent, 0, 0, 0, 0))
 
             elif lower_nibble == 0x06:
                 # player_color_list command
@@ -1543,7 +1542,7 @@ cdef class SLPFrame32:
                     dpos += 1
                     player_color = data_raw[dpos]
 
-                    row_data.push_back(pixel32(color_player, player_color, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_player, player_color, 0, 0, 0))
 
             elif lower_nibble == 0x07:
                 # fill command
@@ -1556,7 +1555,7 @@ cdef class SLPFrame32:
                         dpos += 1
                         pixel_data.push_back(data_raw[dpos])
 
-                    row_data.push_back(pixel32(color_standard,
+                    row_data.push_back(pixel32(pixel_type.color_standard,
                                                pixel_data[2],
                                                pixel_data[1],
                                                pixel_data[0],
@@ -1574,7 +1573,7 @@ cdef class SLPFrame32:
                 player_color = data_raw[dpos]
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel32(color_player, player_color, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_player, player_color, 0, 0, 0))
 
             elif lower_nibble == 0x0B:
                 # shadow command
@@ -1583,7 +1582,7 @@ cdef class SLPFrame32:
                 dpos = cpack.dpos
 
                 for _ in range(cpack.count):
-                    row_data.push_back(pixel32(color_shadow, 0, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_shadow, 0, 0, 0, 0))
 
             elif lower_nibble == 0x0E:
                 # "extended" commands. higher nibble specifies the instruction.
@@ -1616,12 +1615,12 @@ cdef class SLPFrame32:
                     # outline_1 command
                     # the next pixel shall be drawn as special color 1,
                     # if it is obstructed later in rendering
-                    row_data.push_back(pixel32(color_special_1, 0, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_special_1, 0, 0, 0, 0))
 
                 elif higher_nibble == 0x60:
                     # outline_2 command
                     # same as above, but special color 2
-                    row_data.push_back(pixel32(color_special_2, 0, 0, 0, 0))
+                    row_data.push_back(pixel32(pixel_type.color_special_2, 0, 0, 0, 0))
 
                 elif higher_nibble == 0x50:
                     # outline_span_1 command
@@ -1631,7 +1630,7 @@ cdef class SLPFrame32:
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel32(color_special_1, 0, 0, 0, 0))
+                        row_data.push_back(pixel32(pixel_type.color_special_1, 0, 0, 0, 0))
 
                 elif higher_nibble == 0x70:
                     # outline_span_2 command
@@ -1641,7 +1640,7 @@ cdef class SLPFrame32:
                     pixel_count = data_raw[dpos]
 
                     for _ in range(pixel_count):
-                        row_data.push_back(pixel32(color_special_2, 0, 0, 0, 0))
+                        row_data.push_back(pixel32(pixel_type.color_special_2, 0, 0, 0, 0))
 
                 elif higher_nibble == 0x80:
                     # dither command
@@ -1658,7 +1657,7 @@ cdef class SLPFrame32:
                             dpos += 1
                             pixel_data.push_back(data_raw[dpos])
 
-                        row_data.push_back(pixel32(color_standard,
+                        row_data.push_back(pixel32(pixel_type.color_standard,
                                                    pixel_data[2],
                                                    pixel_data[1],
                                                    pixel_data[0],
@@ -1761,20 +1760,20 @@ cdef numpy.ndarray determine_rgba_matrix(vector[vector[pixel]] &image_matrix,
             px_type = px.type
             px_val = px.value
 
-            if px_type == color_standard:
+            if px_type == pixel_type.color_standard:
                 # simply look up the color index in the table
                 r = m_lookup[px_val][0]
                 g = m_lookup[px_val][1]
                 b = m_lookup[px_val][2]
                 alpha = 255
 
-            elif px_type == color_transparent:
+            elif px_type == pixel_type.color_transparent:
                 r, g, b, alpha = 0, 0, 0, 0
 
-            elif px_type == color_shadow:
+            elif px_type == pixel_type.color_shadow:
                 r, g, b, alpha = 0, 0, 0, 100
 
-            elif px_type == color_shadow_v4:
+            elif px_type == pixel_type.color_shadow_v4:
                 r, g, b = 0, 0, 0
                 alpha = 255 - (px_val << 2)
 
@@ -1784,15 +1783,14 @@ cdef numpy.ndarray determine_rgba_matrix(vector[vector[pixel]] &image_matrix,
                 alpha = alpha | 0x01
 
             else:
-                if px_type == color_player_v4 or px_type == color_player:
+                if px_type == pixel_type.color_player_v4 or px_type == pixel_type.color_player:
                     # mark this pixel as player color
                     alpha = 254
 
-                elif px_type == color_special_2 or\
-                     px_type == color_black:
+                elif px_type == pixel_type.color_special_2:
                     alpha = 250  # mark this pixel as special outline
 
-                elif px_type == color_special_1:
+                elif px_type == pixel_type.color_special_1:
                     alpha = 252  # mark this pixel as outline
 
                 else:
@@ -1843,7 +1841,7 @@ cdef numpy.ndarray determine_rgba_matrix32(vector[vector[pixel32]] &image_matrix
             px = current_row[x]
             px_type = px.type
 
-            if px_type == color_standard:
+            if px_type == pixel_type.color_standard:
                 # simply look up the color index in the table
                 r = px.r
                 g = px.g
@@ -1855,13 +1853,13 @@ cdef numpy.ndarray determine_rgba_matrix32(vector[vector[pixel32]] &image_matrix
                 # odd alphas are used for normal pixels (= displayed as-is with transparency)
                 alpha = alpha | 0x01
 
-            elif px_type == color_transparent:
+            elif px_type == pixel_type.color_transparent:
                 r, g, b, alpha = 0, 0, 0, 0
 
-            elif px_type == color_shadow:
+            elif px_type == pixel_type.color_shadow:
                 r, g, b, alpha = 0, 0, 0, 100
 
-            elif px_type == color_shadow_v4:
+            elif px_type == pixel_type.color_shadow_v4:
                 r, g, b = 0, 0, 0
                 alpha = 255 - (px.r << 2)
 
@@ -1871,15 +1869,14 @@ cdef numpy.ndarray determine_rgba_matrix32(vector[vector[pixel32]] &image_matrix
                 alpha = alpha | 0x01
 
             else:
-                if px_type == color_player_v4 or px_type == color_player:
+                if px_type == pixel_type.color_player_v4 or px_type == pixel_type.color_player:
                     # mark this pixel as player color
                     alpha = 254
 
-                elif px_type == color_special_2 or\
-                     px_type == color_black:
+                elif px_type == pixel_type.color_special_2:
                     alpha = 250  # mark this pixel as special outline
 
-                elif px_type == color_special_1:
+                elif px_type == pixel_type.color_special_1:
                     alpha = 252  # mark this pixel as outline
 
                 else:
