@@ -10,6 +10,8 @@
 #include <ostream>
 #include <type_traits>
 
+#include "error/error.h"
+
 #include "compiler.h"
 #include "misc.h"
 
@@ -545,6 +547,10 @@ constexpr FixedPoint<I, F> operator/(const FixedPoint<I, F> lhs, const N &rhs) {
  */
 template <typename I, unsigned int F>
 constexpr FixedPoint<I, F> operator%(const FixedPoint<I, F> lhs, const FixedPoint<I, F> rhs) {
+	ENSURE(rhs > 0,
+	       "Cannot use module operation for exponent that is zero or negative: "
+	           << lhs << " % " << rhs);
+
 	auto div = (lhs / rhs);
 	auto n = div.to_int();
 	return lhs - (rhs * n);
