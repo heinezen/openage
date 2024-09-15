@@ -61,7 +61,16 @@ CommandInQueue(Condition):
     pass
 ```
 
-Is true when the command queue is not empty when the node is visited.
+Is true when the game entity's command queue is not empty when the node is visited.
+
+## util.activity.condition.type.NextCommandApplyEffect
+
+```python
+NextCommandApplyEffect(Condition):
+    pass
+```
+
+Is true when the next command in the game entity's command queue is of type `ApplyEffect`.
 
 ## util.activity.condition.type.NextCommandIdle
 
@@ -70,7 +79,7 @@ NextCommandIdle(Condition):
     pass
 ```
 
-Is true when the next command in the queue is of type `Idle`.
+Is true when the next command in the game entity's command queue is of type `Idle`.
 
 ## util.activity.condition.type.NextCommandMove
 
@@ -79,7 +88,7 @@ NextCommandMove(Condition):
     pass
 ```
 
-Is true when the next command in the queue is of type `Move`.
+Is true when the next command in the game entity's command queue is of type `Move`.
 
 ## util.activity.event.Event
 
