@@ -10409,7 +10409,7 @@ bg=pink</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2520</x>
-      <y>2070</y>
+      <y>1990</y>
       <w>140</w>
       <h>80</h>
     </coordinates>
@@ -10424,18 +10424,18 @@ next : Node</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2450</x>
-      <y>2100</y>
+      <y>2020</y>
       <w>90</w>
-      <h>240</h>
+      <h>320</h>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>70.0;10.0;10.0;10.0;10.0;220.0</additional_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0;10.0;300.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2170</y>
+      <y>2090</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10448,18 +10448,18 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2140</y>
+      <y>2060</y>
       <w>30</w>
-      <h>220</h>
+      <h>290</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;200.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;270.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2190</y>
+      <y>2110</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10470,7 +10470,7 @@ bg=pink</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2240</y>
+      <y>2160</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10483,7 +10483,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2260</y>
+      <y>2180</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10505,7 +10505,7 @@ bg=pink</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2310</y>
+      <y>2230</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10518,7 +10518,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2330</y>
+      <y>2250</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10548,5 +10548,29 @@ bg=pink</panel_attributes>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
     <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2610</x>
+      <y>2300</y>
+      <w>200</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>
+*NextCommandApplyEffect*
+bg=pink</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2580</x>
+      <y>2320</y>
+      <w>50</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;30.0;10.0</additional_attributes>
   </element>
 </diagram>
