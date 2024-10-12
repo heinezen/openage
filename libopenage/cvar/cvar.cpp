@@ -1,4 +1,4 @@
-// Copyright 2013-2020 the openage authors. See copying.md for legal info.
+// Copyright 2013-2024 the openage authors. See copying.md for legal info.
 
 #include "cvar.h"
 
@@ -8,8 +8,7 @@
 namespace openage {
 namespace cvar {
 
-CVarManager::CVarManager(const util::Path &path)
-	:
+CVarManager::CVarManager(const util::Path &path) :
 	path{path} {}
 
 
@@ -51,6 +50,7 @@ void CVarManager::load_all() {
 	this->load_config(this->path["keybinds.oac"]);
 }
 
-pyinterface::PyIfFunc<void, CVarManager *, const util::Path &> pyx_load_config_file;
+pyinterface::PyIfFunc<int, CVarManager *, const util::Path &> pyx_load_config_file;
 
-}} // openage::cvar
+} // namespace cvar
+} // namespace openage

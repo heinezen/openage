@@ -97,9 +97,9 @@ private:
  *
  * pxd:
  * ctypedef CVarManager * CVarManagerPtr
- * PyIfFunc2[void, CVarManagerPtr, const Path&] pyx_load_config_file
+ * PyIfFunc2[int, CVarManagerPtr, const Path&] pyx_load_config_file
  */
-extern OAAPI pyinterface::PyIfFunc<void, CVarManager *, const util::Path &> pyx_load_config_file;
+extern OAAPI pyinterface::PyIfFunc<int, CVarManager *, const util::Path &> pyx_load_config_file;
 
 } // namespace cvar
 } // namespace openage

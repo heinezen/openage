@@ -1,4 +1,4 @@
-# Copyright 2016-2017 the openage authors. See copying.md for legal info.
+# Copyright 2016-2024 the openage authors. See copying.md for legal info.
 
 from os.path import expanduser, expandvars
 from pathlib import Path
@@ -19,7 +19,7 @@ from .. import default_dirs
 # TODO: turn this into a config and user profile system.
 
 
-cdef void cy_load_config_file(CVarManager *manager, const Path &path) except * with gil:
+cdef int cy_load_config_file(CVarManager *manager, const Path &path) except * with gil:
     """
     Relay the call to load values from a config file
     into the configuration manager.
