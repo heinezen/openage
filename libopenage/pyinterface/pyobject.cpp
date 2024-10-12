@@ -1,4 +1,4 @@
-// Copyright 2015-2023 the openage authors. See copying.md for legal info.
+// Copyright 2015-2024 the openage authors. See copying.md for legal info.
 
 #include "pyobject.h"
 
@@ -15,18 +15,14 @@ PyObjectRef::PyObjectRef() noexcept
 	ref{nullptr} {}
 
 
-PyObjectRef::PyObjectRef(PyObject *ref)
-	:
+PyObjectRef::PyObjectRef(PyObject *ref) :
 	ref{ref} {
-
 	py_xincref.call(this->ref);
 }
 
 
-PyObjectRef::PyObjectRef(const PyObjectRef &other)
-	:
+PyObjectRef::PyObjectRef(const PyObjectRef &other) :
 	ref{other.ref} {
-
 	py_xincref.call(this->ref);
 }
 
@@ -34,13 +30,12 @@ PyObjectRef::PyObjectRef(const PyObjectRef &other)
 PyObjectRef::PyObjectRef(PyObjectRef &&other) noexcept
 	:
 	ref{other.ref} {
-
 	// don't incref, because we simultaneously clear other.ref.
 	other.ref = nullptr;
 }
 
 
-PyObjectRef &PyObjectRef::operator =(const PyObjectRef &other) {
+PyObjectRef &PyObjectRef::operator=(const PyObjectRef &other) {
 	if (this->ref != nullptr) {
 		py_xdecref.call(this->ref);
 	}
@@ -52,7 +47,7 @@ PyObjectRef &PyObjectRef::operator =(const PyObjectRef &other) {
 }
 
 
-PyObjectRef &PyObjectRef::operator =(PyObjectRef &&other) {
+PyObjectRef &PyObjectRef::operator=(PyObjectRef &&other) {
 	if (this->ref != nullptr) {
 		py_xdecref.call(this->ref);
 	}
@@ -70,8 +65,7 @@ PyObjectRef &PyObjectRef::operator =(PyObjectRef &&other) {
  * Integer conversion.
  */
 template <>
-PyObjectRef::PyObjectRef(int number)
-	:
+PyObjectRef::PyObjectRef(int number) :
 	PyObjectRef(py::integer(number)) {}
 
 
@@ -79,8 +73,7 @@ PyObjectRef::PyObjectRef(int number)
  * Bytes conversion.
  */
 template <>
-PyObjectRef::PyObjectRef(const char *data)
-	:
+PyObjectRef::PyObjectRef(const char *data) :
 	PyObjectRef(py::bytes(data)) {}
 
 
@@ -88,8 +81,7 @@ PyObjectRef::PyObjectRef(const char *data)
  * String conversion.
  */
 template <>
-PyObjectRef::PyObjectRef(const std::string &txt)
-	:
+PyObjectRef::PyObjectRef(const std::string &txt) :
 	PyObjectRef(py::bytes(txt)) {}
 
 
@@ -148,10 +140,10 @@ PyObjectRef PyObjectRef::call_impl(std::vector<PyObjectRef> &args) const {
 	PyObjectRef result;
 	if (args.empty()) {
 		py_call0.call(&result, this->ref);
-	} else {
+	}
+	else {
 		std::vector<PyObject *> py_args{args.size()};
-		std::transform(args.begin(), args.end(), py_args.begin(),
-		               std::mem_fn(&PyObjectRef::get_ref));
+		std::transform(args.begin(), args.end(), py_args.begin(), std::mem_fn(&PyObjectRef::get_ref));
 		py_calln.call(&result, this->ref, py_args);
 	}
 	return result;
@@ -258,10 +250,11 @@ std::string PyObjectRef::classname() const {
 }
 
 
-std::ostream &operator <<(std::ostream &os, const PyObjectRef &ref) {
+std::ostream &operator<<(std::ostream &os, const PyObjectRef &ref) {
 	if (ref.get_ref() == nullptr) [[unlikely]] {
 		os << "PyObjectRef[null]";
-	} else {
+	}
+	else {
 		os << "PyObjectRef[" << ref.repr() << "]";
 	}
 
@@ -277,37 +270,37 @@ PyIfFunc<std::string, PyObject *> py_repr;
 PyIfFunc<std::string, PyObject *> py_bytes;
 PyIfFunc<int, PyObject *> py_len;
 PyIfFunc<bool, PyObject *> py_callable;
-PyIfFunc<void, PyObjectRef *, PyObject *> py_call0;
-PyIfFunc<void, PyObjectRef *, PyObject *, std::vector<PyObject *>&> py_calln;
+PyIfFunc<int, PyObjectRef *, PyObject *> py_call0;
+PyIfFunc<int, PyObjectRef *, PyObject *, std::vector<PyObject *> &> py_calln;
 PyIfFunc<bool, PyObject *, std::string> py_hasattr;
-PyIfFunc<void, PyObjectRef *, PyObject *, std::string> py_getattr;
-PyIfFunc<void, PyObject *, std::string, PyObject *> py_setattr;
+PyIfFunc<int, PyObjectRef *, PyObject *, std::string> py_getattr;
+PyIfFunc<int, PyObject *, std::string, PyObject *> py_setattr;
 PyIfFunc<bool, PyObject *, PyObject *> py_isinstance;
 PyIfFunc<bool, PyObject *> py_to_bool;
 PyIfFunc<int64_t, PyObject *> py_to_int;
-PyIfFunc<void, PyObject *, Func<void, std::string>> py_dir;
+PyIfFunc<int, PyObject *, Func<void, std::string>> py_dir;
 PyIfFunc<bool, PyObject *, PyObject *> py_equals;
-PyIfFunc<void, PyObject *, std::string> py_exec;
-PyIfFunc<void, PyObject *, PyObjectRef *, std::string> py_eval;
-PyIfFunc<void, PyObject *, PyObjectRef *, PyObject *> py_get;
+PyIfFunc<int, PyObject *, std::string> py_exec;
+PyIfFunc<int, PyObject *, PyObjectRef *, std::string> py_eval;
+PyIfFunc<int, PyObject *, PyObjectRef *, PyObject *> py_get;
 PyIfFunc<bool, PyObject *, PyObject *> py_in;
-PyIfFunc<void, PyObject *, PyObjectRef *> py_type;
+PyIfFunc<int, PyObject *, PyObjectRef *> py_type;
 PyIfFunc<std::string, PyObject *> py_modulename;
 PyIfFunc<std::string, PyObject *> py_classname;
 
-PyIfFunc<void, PyObjectRef *, const std::string&> py_builtin;
-PyIfFunc<void, PyObjectRef *, const std::string&> py_import;
-PyIfFunc<void, PyObjectRef *, const std::string&> py_createstr;
-PyIfFunc<void, PyObjectRef *, const std::string&> py_createbytes;
-PyIfFunc<void, PyObjectRef *, int> py_createint;
-PyIfFunc<void, PyObjectRef *> py_createdict;
-PyIfFunc<void, PyObjectRef *> py_createlist;
+PyIfFunc<int, PyObjectRef *, const std::string &> py_builtin;
+PyIfFunc<int, PyObjectRef *, const std::string &> py_import;
+PyIfFunc<int, PyObjectRef *, const std::string &> py_createstr;
+PyIfFunc<int, PyObjectRef *, const std::string &> py_createbytes;
+PyIfFunc<int, PyObjectRef *, int> py_createint;
+PyIfFunc<int, PyObjectRef *> py_createdict;
+PyIfFunc<int, PyObjectRef *> py_createlist;
 
 PyObjectRef None;
 PyObjectRef True;
 PyObjectRef False;
 
-} // pyinterface
+} // namespace pyinterface
 
 
 namespace py {
@@ -363,5 +356,5 @@ Obj list() {
 }
 
 
-} // py
-} // openage
+} // namespace py
+} // namespace openage
