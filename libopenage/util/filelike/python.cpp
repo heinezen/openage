@@ -1,4 +1,4 @@
-// Copyright 2017-2019 the openage authors. See copying.md for legal info.
+// Copyright 2017-2024 the openage authors. See copying.md for legal info.
 
 #include "python.h"
 
@@ -7,8 +7,7 @@
 
 namespace openage::util::filelike {
 
-Python::Python(const py::Obj &fileobj)
-	:
+Python::Python(const py::Obj &fileobj) :
 	fileobj{std::make_shared<py::Obj>(fileobj)} {}
 
 
@@ -89,14 +88,14 @@ std::ostream &Python::repr(std::ostream &stream) {
 pyinterface::PyIfFunc<std::string, PyObject *, ssize_t> pyx_file_read;
 pyinterface::PyIfFunc<size_t, PyObject *, void *, ssize_t> pyx_file_read_to;
 pyinterface::PyIfFunc<bool, PyObject *> pyx_file_readable;
-pyinterface::PyIfFunc<void, PyObject *, const std::string &> pyx_file_write;
+pyinterface::PyIfFunc<int, PyObject *, const std::string &> pyx_file_write;
 pyinterface::PyIfFunc<bool, PyObject *> pyx_file_writable;
-pyinterface::PyIfFunc<void, PyObject *, ssize_t, int> pyx_file_seek;
+pyinterface::PyIfFunc<int, PyObject *, ssize_t, int> pyx_file_seek;
 pyinterface::PyIfFunc<bool, PyObject *> pyx_file_seekable;
 pyinterface::PyIfFunc<size_t, PyObject *> pyx_file_tell;
-pyinterface::PyIfFunc<void, PyObject *> pyx_file_close;
-pyinterface::PyIfFunc<void, PyObject *> pyx_file_flush;
+pyinterface::PyIfFunc<int, PyObject *> pyx_file_close;
+pyinterface::PyIfFunc<int, PyObject *> pyx_file_flush;
 pyinterface::PyIfFunc<ssize_t, PyObject *> pyx_file_size;
 
 
-} // openage::util::filelike
+} // namespace openage::util::filelike

@@ -1,4 +1,4 @@
-# Copyright 2017-2020 the openage authors. See copying.md for legal info.
+# Copyright 2017-2024 the openage authors. See copying.md for legal info.
 
 """
 Functions called from C++ to perform method calls on
@@ -170,7 +170,7 @@ cdef bool file_readable(PyObject *filelike) except * with gil:
     return (<object> filelike).readable()
 
 
-cdef void file_write(PyObject *filelike, const string &data) except * with gil:
+cdef int file_write(PyObject *filelike, const string &data) except * with gil:
     (<object> filelike).write(data)
 
 
@@ -178,7 +178,7 @@ cdef bool file_writable(PyObject *filelike) except * with gil:
     return (<object> filelike).writable()
 
 
-cdef void file_seek(PyObject *filelike, ssize_t offset, int how) except * with gil:
+cdef int file_seek(PyObject *filelike, ssize_t offset, int how) except * with gil:
     # how is SEEK_POS=0, SEEK_CUR=1, SEEK_END=2
     (<object> filelike).seek(offset, how)
 
@@ -191,11 +191,11 @@ cdef size_t file_tell(PyObject *filelike) except * with gil:
     return (<object> filelike).tell()
 
 
-cdef void file_close(PyObject *filelike) except * with gil:
+cdef int file_close(PyObject *filelike) except * with gil:
     (<object> filelike).close()
 
 
-cdef void file_flush(PyObject *filelike) except * with gil:
+cdef int file_flush(PyObject *filelike) except * with gil:
     (<object> filelike).flush()
 
 
