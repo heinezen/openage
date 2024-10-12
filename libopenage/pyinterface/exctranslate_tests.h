@@ -23,25 +23,25 @@ OAAPI void err_cpp_to_py_helper();
  * Part of pyinterface::demo_py_to_cpp.
  * Shall throw some exceptions, which we then translate to C++.
  *
- * pxd: PyIfFunc0[void] err_py_to_cpp_helper
+ * pxd: PyIfFunc0[int] err_py_to_cpp_helper
  */
-extern OAAPI PyIfFunc<void> err_py_to_cpp_helper;
+extern OAAPI PyIfFunc<int> err_py_to_cpp_helper;
 
 
 /**
  * See the doc in exctranslate_tests.pyx.
  *
- * pxd: void bounce_call(Func0[void], int) except +
+ * pxd: void bounce_call(Func0[int], int) except +
  */
-OAAPI void bounce_call(const Func<void> &func, int times);
+OAAPI void bounce_call(const Func<int> &func, int times);
 
 
 /**
  * Called by bounce_call() to bounce back to Python.
  *
- * pxd: PyIfFunc2[void, Func0[void], int] bounce_call_py
+ * pxd: PyIfFunc2[int, Func0[int], int] bounce_call_py
  */
-extern OAAPI PyIfFunc<void, Func<void>, int> bounce_call_py;
+extern OAAPI PyIfFunc<int, Func<int>, int> bounce_call_py;
 
 
 } // namespace tests

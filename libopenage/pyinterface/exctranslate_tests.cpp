@@ -1,4 +1,4 @@
-// Copyright 2015-2021 the openage authors. See copying.md for legal info.
+// Copyright 2015-2024 the openage authors. See copying.md for legal info.
 
 #include "exctranslate_tests.h"
 
@@ -12,13 +12,13 @@
 namespace openage::pyinterface::tests {
 
 
-template<int i=3>
+template <int i = 3>
 void throw_foo() {
 	throw_foo<i - 1>();
 }
 
 
-template<>
+template <>
 void throw_foo<0>() {
 	throw Error(MSG(err) << "foo", true, true);
 }
@@ -28,10 +28,12 @@ void err_cpp_to_py_helper() {
 	try {
 		try {
 			throw Error(MSG(err) << "rofl");
-		} catch (...) {
+		}
+		catch (...) {
 			TESTFAIL;
 		}
-	} catch (...) {
+	}
+	catch (...) {
 		throw_foo();
 	}
 }
@@ -45,12 +47,11 @@ void err_py_to_cpp() {
 	// a std::string error message.
 
 	std::string testresult = []() -> std::string {
-
 		try {
 			err_py_to_cpp_helper.call();
 			return "err_py_to_cpp_helper didn't throw an exception";
-
-		} catch (PyException &exc) {
+		}
+		catch (PyException &exc) {
 			// this is what we expected.
 			// now let's see whether the object contains the expected data.
 			if (exc.type_name() != "openage.cppinterface.exctranslate_tests.Bar") {
@@ -65,8 +66,8 @@ void err_py_to_cpp() {
 			try {
 				exc.rethrow_cause();
 				return "exc had no cause";
-
-			} catch (PyException &cause) {
+			}
+			catch (PyException &cause) {
 				if (cause.type_name() != "openage.testing.testing.TestError") {
 					return "unexpected cause typename: " + cause.type_name();
 				}
@@ -79,22 +80,24 @@ void err_py_to_cpp() {
 				try {
 					cause.rethrow_cause();
 					return "OK";
-				} catch (...) {
+				}
+				catch (...) {
 					return "cause unexpectedly had a cause itself.";
 				}
-
-			} catch (std::exception &cause) {
+			}
+			catch (std::exception &cause) {
 				return "exc had cause of unexpected type " + util::typestring(cause);
-			} catch (...) {
+			}
+			catch (...) {
 				return "exc had cause of nonstandard type";
 			}
-
-		} catch (std::exception &cause) {
+		}
+		catch (std::exception &cause) {
 			return "exc had unexpected type " + util::typestring(cause);
-		} catch (...) {
+		}
+		catch (...) {
 			return "exc had nonstandard type";
 		}
-
 	}();
 
 	if (testresult != "OK") {
@@ -106,24 +109,22 @@ void err_py_to_cpp() {
 void err_py_to_cpp_demo() {
 	try {
 		err_py_to_cpp_helper.call();
-		log::log(MSG(err) <<
-			"Unexpectedly, the helper did not raise an Exception");
-
-	} catch (Error &err) {
-		log::log(MSG(info) <<
-			"The helper raised the following Exception:" << std::endl <<
-			err);
+		log::log(MSG(err) << "Unexpectedly, the helper did not raise an Exception");
+	}
+	catch (Error &err) {
+		log::log(MSG(info) << "The helper raised the following Exception:" << std::endl
+		                   << err);
 	}
 }
 
 
-void bounce_call(const Func<void> &func, int times) {
+void bounce_call(const Func<int> &func, int times) {
 	bounce_call_py.call(func, times);
 }
 
 
-PyIfFunc<void> err_py_to_cpp_helper;
-PyIfFunc<void, Func<void>, int> bounce_call_py;
+PyIfFunc<int> err_py_to_cpp_helper;
+PyIfFunc<int, Func<int>, int> bounce_call_py;
 
 
-} // openage::pyinterface::tests
+} // namespace openage::pyinterface::tests

@@ -1,4 +1,4 @@
-# Copyright 2015-2017 the openage authors. See copying.md for legal info.
+# Copyright 2015-2024 the openage authors. See copying.md for legal info.
 
 """
 Testing code for exctranslate.pyx.
@@ -22,8 +22,10 @@ from ..testing.testing import TestError, assert_value
 from .exctranslate import CPPException
 
 
-cdef void call_cpp_thrower() except * with gil:
+cdef int call_cpp_thrower() except * with gil:
     err_cpp_to_py_helper()
+
+    return 0
 
 
 def cpp_to_py_demo(args):
@@ -31,7 +33,7 @@ def cpp_to_py_demo(args):
     Calls a C++ method that throws a complicated exception, and prints
     that exception.
     """
-    cdef Func0[void] cpp_thrower
+    cdef Func0[int] cpp_thrower
 
     cli = argparse.ArgumentParser("cpp_to_py_demo")
     cli.add_argument("bounce_count", type=int, default=0, nargs='?')
@@ -55,7 +57,7 @@ def cpp_to_py(int bounce_count = 0):
     Calls a C++ method that throws a exception, and tests whether
     that exception is properly translated.
     """
-    cdef Func0[void] cpp_thrower
+    cdef Func0[int] cpp_thrower
 
     try:
         if bounce_count == 0:
@@ -114,15 +116,17 @@ def throw_bar(cause, ctr=3):
         raise Bar("bar") from cause
 
 
-cdef void py_exc_raiser() except * with gil:
+cdef int py_exc_raiser() except * with gil:
     """ Raises some Py exceptions for C++ to analyze and convert to C++. """
     try:
         raise TestError("foo")
     except Exception as exc:
         throw_bar(exc)
 
+    return 0
 
-cdef void bounce_call(Func0[void] func, int times) except * with gil:
+
+cdef int bounce_call(Func0[int] func, int times) except * with gil:
     """
     Creates a callstack consisting of 'times' alterations of this function
     and its C++ counterpart.
@@ -132,6 +136,8 @@ cdef void bounce_call(Func0[void] func, int times) except * with gil:
         func.call()
     else:
         bounce_call_cpp(func, times - 1)
+
+    return 0
 
 
 def setup():
