@@ -133,17 +133,17 @@ OAAPI void init_exc_message(log::message *msg, const std::string &filename, unsi
  * pxd:
  *
  * void set_exc_translation_funcs(
- *     void (*)(Error *)       except * with gil,
- *     void (*)(PyException *) except * with gil,
- *     cppbool (*)()                    with gil,
- *     void (*)(PyException *) except * with gil
+ *     int (*)(Error *)       except * with gil,
+ *     int (*)(PyException *) except * with gil,
+ *     cppbool (*)()                   with gil,
+ *     int (*)(PyException *) except * with gil
  * ) noexcept
  */
 OAAPI void set_exc_translation_funcs(
-	void (*raise_cpp_error)(Error *),
-	void (*raise_cpp_pyexception)(PyException *),
+	int (*raise_cpp_error)(Error *),
+	int (*raise_cpp_pyexception)(PyException *),
 	bool (*check_for_py_exception)(),
-	void (*describe_py_exception)(PyException *));
+	int (*describe_py_exception)(PyException *));
 
 
 } // namespace pyinterface

@@ -1,4 +1,4 @@
-// Copyright 2015-2017 the openage authors. See copying.md for legal info.
+// Copyright 2015-2024 the openage authors. See copying.md for legal info.
 
 #include "pyexception.h"
 
@@ -8,10 +8,11 @@ namespace openage {
 namespace pyinterface {
 
 
-void PyExceptionBacktrace::get_symbols(std::function<void (const error::backtrace_symbol *)> cb, bool reversed) const {
+void PyExceptionBacktrace::get_symbols(std::function<void(const error::backtrace_symbol *)> cb, bool reversed) const {
 	if (reversed) {
 		pyexception_bt_get_symbols.call(this->ref, cb);
-	} else {
+	}
+	else {
 		// pyexception_bt_get_symbols gives us the symbols in reverse order, we'll have to use a std::vector
 		// to flip it.
 
@@ -43,7 +44,8 @@ std::string PyException::type_name() const {
 }
 
 
-PyIfFunc<void, PyObject *, Func<void, const error::backtrace_symbol *>> pyexception_bt_get_symbols;
+PyIfFunc<int, PyObject *, Func<void, const error::backtrace_symbol *>> pyexception_bt_get_symbols;
 
 
-}} // openage::pyinterface
+} // namespace pyinterface
+} // namespace openage

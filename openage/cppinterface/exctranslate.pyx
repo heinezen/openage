@@ -125,7 +125,7 @@ cdef void raise_cpp_error_common(Error *cpp_error_obj, object obj_to_raise) noex
     PyErr_SetObject(type(obj_to_raise), obj_to_raise)
 
 
-cdef void raise_cpp_error(Error *cpp_error_obj) except * with gil:
+cdef int raise_cpp_error(Error *cpp_error_obj) except * with gil:
     # see the doc of the function pointer in exctranslate.h
     # raises a py exception that corresponds to the given Error obj.
 
@@ -140,7 +140,6 @@ cdef void raise_cpp_error(Error *cpp_error_obj) except * with gil:
     # A Python exception is active from this point on.
     # Don't use any Python functionality.
 
-
     # add traceback lines for cpp message obj metadata
     PyTraceback_Add(cpp_error_obj.msg.functionname,
                     cpp_error_obj.msg.filename,
@@ -153,8 +152,10 @@ cdef void raise_cpp_error(Error *cpp_error_obj) except * with gil:
         cpp_error_obj.trim_backtrace()
         cpp_error_obj.backtrace.get_symbols(py_backtrace_adder, False)
 
+    return 0
 
-cdef void raise_cpp_pyexception(PyException *cpp_pyexception_obj) except * with gil:
+
+cdef int raise_cpp_pyexception(PyException *cpp_pyexception_obj) except * with gil:
     # see the doc of the function pointer in exctranslate.h
     # raises a py exception that corresponds to the given PyException obj.
 
@@ -166,13 +167,15 @@ cdef void raise_cpp_pyexception(PyException *cpp_pyexception_obj) except * with 
     # exc still has its proper backtrace from last time;
     # No new data was added during its C++ life.
 
+    return 0
+
 
 cdef cppbool check_exception() noexcept with gil:
     # see the doc of the function pointer in exctranslate.h
     return (PyErr_Occurred() != NULL)
 
 
-cdef void describe_exception(PyException *pyex) except * with gil:
+cdef int describe_exception(PyException *pyex) except * with gil:
     # see the doc of the function pointer in exctranslate.h
     # describes the current py exc and stores the desc in pyex.
 
@@ -243,8 +246,10 @@ cdef void describe_exception(PyException *pyex) except * with gil:
         PyErr_SetObject(type(cause), cause)
         # now a Python exception is active again.
 
+    return 0
 
-cdef void pyexception_bt_get_symbols_impl(
+
+cdef int pyexception_bt_get_symbols_impl(
         PyObject *py_obj,
         Func1[void, const backtrace_symbol *] callback) except * with gil:
 
@@ -263,6 +268,8 @@ cdef void pyexception_bt_get_symbols_impl(
 
         frame = frame.tb_next
 
+    return 0
+
 
 def setup(args):
     """
@@ -273,7 +280,6 @@ def setup(args):
         raise_cpp_pyexception,
         check_exception,
         describe_exception)
-
 
     if args.trap_exceptions:
         info("Throwing errors will break into an attached debugger")

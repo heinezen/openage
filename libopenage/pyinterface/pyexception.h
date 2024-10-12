@@ -80,8 +80,8 @@ public:
 };
 
 
-// pxd: PyIfFunc2[void, PyObjectPtr, Func1[void, backtrace_symbol_constptr]] pyexception_bt_get_symbols
-extern OAAPI PyIfFunc<void, PyObject *, Func<void, const error::backtrace_symbol *>> pyexception_bt_get_symbols;
+// pxd: PyIfFunc2[int, PyObjectPtr, Func1[void, backtrace_symbol_constptr]] pyexception_bt_get_symbols
+extern OAAPI PyIfFunc<int, PyObject *, Func<void, const error::backtrace_symbol *>> pyexception_bt_get_symbols;
 
 
 } // namespace pyinterface

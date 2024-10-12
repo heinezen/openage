@@ -1,18 +1,18 @@
-// Copyright 2015-2023 the openage authors. See copying.md for legal info.
+// Copyright 2015-2024 the openage authors. See copying.md for legal info.
 
 #include "exctranslate.h"
 
+#include <ios>
 #include <new>
-#include <typeinfo>
 #include <stdexcept>
 #include <string>
-#include <ios>
+#include <typeinfo>
 
-#include "../util/timing.h"
 #include "../error/error.h"
+#include "../log/level.h"
 #include "../util/compiler.h"
 #include "../util/thread_id.h"
-#include "../log/level.h"
+#include "../util/timing.h"
 
 #include "pyexception.h"
 
@@ -21,19 +21,18 @@ namespace pyinterface {
 
 
 // python exception translation function pointers
-void (*raise_cpp_error)(Error *) = nullptr;
-void (*raise_cpp_pyexception)(PyException *) = nullptr;
+int (*raise_cpp_error)(Error *) = nullptr;
+int (*raise_cpp_pyexception)(PyException *) = nullptr;
 
-void (*describe_py_exception)(PyException *) = nullptr;
+int (*describe_py_exception)(PyException *) = nullptr;
 bool (*check_for_py_exception)() = nullptr;
 
 
 void set_exc_translation_funcs(
-	void (*raise_cpp_error_impl)(Error *),
-	void (*raise_cpp_pyexception_impl)(PyException *),
+	int (*raise_cpp_error_impl)(Error *),
+	int (*raise_cpp_pyexception_impl)(PyException *),
 	bool (*check_for_py_exception_impl)(),
-	void (*describe_py_exception_impl)(PyException *)) {
-
+	int (*describe_py_exception_impl)(PyException *)) {
 	raise_cpp_error = raise_cpp_error_impl;
 	raise_cpp_pyexception = raise_cpp_pyexception_impl;
 	check_for_py_exception = check_for_py_exception_impl;
@@ -53,26 +52,24 @@ void translate_exc_cpp_to_py() {
 		// and to restore its context in case it's an exception that doesn't
 		// store useful information.
 		throw;
-
-	} catch (PyException &exc) {
-
+	}
+	catch (PyException &exc) {
 		if (raise_cpp_pyexception == nullptr) [[unlikely]] {
-			throw Error(MSG(err) <<
-				"raise_pyexception_in_py is uninitialized; "
-				"can't translate C++ exception to Python exception.",
-				false, false);
+			throw Error(MSG(err) << "raise_pyexception_in_py is uninitialized; "
+			                        "can't translate C++ exception to Python exception.",
+			            false,
+			            false);
 		}
 
 		// handle the python object directly by PyErr_SetObject
 		raise_cpp_pyexception(&exc);
-
-	} catch (Error &exc) {
-
+	}
+	catch (Error &exc) {
 		if (raise_cpp_error == nullptr) [[unlikely]] {
-			throw Error(MSG(err) <<
-				"raise_error_in_py is uninitialized; "
-				"can't translate C++ exception to Python exception.",
-				false, false);
+			throw Error(MSG(err) << "raise_error_in_py is uninitialized; "
+			                        "can't translate C++ exception to Python exception.",
+			            false,
+			            false);
 		}
 
 		// translate the exception to python
@@ -92,9 +89,8 @@ void translate_exc_cpp_to_py() {
 
 void translate_exc_py_to_cpp() {
 	if (describe_py_exception == nullptr) [[unlikely]] {
-		throw Error(MSG(err) <<
-			"describe_py_exception is uninitialized; "
-			"can't check for and translate Python exception to C++ exception.");
+		throw Error(MSG(err) << "describe_py_exception is uninitialized; "
+		                        "can't check for and translate Python exception to C++ exception.");
 	}
 
 	if (not check_for_py_exception()) [[likely]] {
@@ -108,7 +104,8 @@ void translate_exc_py_to_cpp() {
 	// recurse to throw a possible cause.
 	try {
 		translate_exc_py_to_cpp();
-	} catch (...) {
+	}
+	catch (...) {
 		pyex.store_cause();
 	}
 
@@ -120,7 +117,8 @@ void translate_exc_py_to_cpp() {
 void init_exc_message(log::message *msg, const std::string &filename, unsigned int lineno, const std::string &functionname) noexcept {
 	try {
 		msg->init_with_metadata_copy(filename, functionname);
-	} catch (...) {
+	}
+	catch (...) {
 		// we cannot afford to raise an exception from this function;
 		// this is part of the exception translation code.
 		std::cout << "[WTF] failed so init exception message!" << std::endl;
@@ -131,4 +129,5 @@ void init_exc_message(log::message *msg, const std::string &filename, unsigned i
 }
 
 
-}} // openage::pyinterface
+} // namespace pyinterface
+} // namespace openage
