@@ -10198,7 +10198,7 @@ default : Node</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2290</x>
-      <y>2410</y>
+      <y>2500</y>
       <w>220</w>
       <h>80</h>
     </coordinates>
@@ -10240,7 +10240,7 @@ ability : abstract(Ability)</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2250</x>
-      <y>2440</y>
+      <y>2530</y>
       <w>60</w>
       <h>30</h>
     </coordinates>
@@ -10300,7 +10300,7 @@ bg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2560</x>
-      <y>2420</y>
+      <y>2510</y>
       <w>110</w>
       <h>60</h>
     </coordinates>
@@ -10313,7 +10313,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2500</x>
-      <y>2440</y>
+      <y>2530</y>
       <w>80</w>
       <h>30</h>
     </coordinates>
@@ -10324,7 +10324,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2470</y>
+      <y>2560</y>
       <w>30</w>
       <h>240</h>
     </coordinates>
@@ -10335,7 +10335,7 @@ bg=pink</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2500</y>
+      <y>2590</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -10350,7 +10350,7 @@ time : float</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2590</y>
+      <y>2680</y>
       <w>120</w>
       <h>60</h>
     </coordinates>
@@ -10363,7 +10363,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2530</y>
+      <y>2620</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10374,7 +10374,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2610</y>
+      <y>2700</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10385,7 +10385,7 @@ bg=pink</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>2610</x>
-      <y>2660</y>
+      <y>2750</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10398,7 +10398,7 @@ bg=pink</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>2580</x>
-      <y>2680</y>
+      <y>2770</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10408,8 +10408,8 @@ bg=pink</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>2520</x>
-      <y>1990</y>
+      <x>2440</x>
+      <y>1910</y>
       <w>140</w>
       <h>80</h>
     </coordinates>
@@ -10423,19 +10423,19 @@ next : Node</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2450</x>
-      <y>2020</y>
+      <x>2370</x>
+      <y>1940</y>
       <w>90</w>
-      <h>320</h>
+      <h>400</h>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>70.0;10.0;10.0;10.0;10.0;300.0</additional_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0;10.0;380.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>2610</x>
-      <y>2090</y>
+      <x>2530</x>
+      <y>2010</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10447,8 +10447,8 @@ bg=pink</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2580</x>
-      <y>2060</y>
+      <x>2500</x>
+      <y>1980</y>
       <w>30</w>
       <h>290</h>
     </coordinates>
@@ -10458,8 +10458,8 @@ bg=pink</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2580</x>
-      <y>2110</y>
+      <x>2500</x>
+      <y>2030</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10469,8 +10469,8 @@ bg=pink</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>2610</x>
-      <y>2160</y>
+      <x>2530</x>
+      <y>2080</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10482,8 +10482,8 @@ bg=pink</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2580</x>
-      <y>2180</y>
+      <x>2500</x>
+      <y>2100</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10504,8 +10504,8 @@ bg=pink</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>2610</x>
-      <y>2230</y>
+      <x>2530</x>
+      <y>2150</y>
       <w>160</w>
       <h>60</h>
     </coordinates>
@@ -10517,8 +10517,8 @@ bg=pink</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2580</x>
-      <y>2250</y>
+      <x>2500</x>
+      <y>2170</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
@@ -10552,8 +10552,8 @@ bg=pink</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>2610</x>
-      <y>2300</y>
+      <x>2530</x>
+      <y>2220</y>
       <w>200</w>
       <h>60</h>
     </coordinates>
@@ -10565,12 +10565,89 @@ bg=pink</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2580</x>
-      <y>2320</y>
+      <x>2500</x>
+      <y>2240</y>
       <w>50</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>lt=-</panel_attributes>
     <additional_attributes>10.0;10.0;30.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2290</x>
+      <y>2410</y>
+      <w>250</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>*XORSwitchGate*
+bg=pink
+
+--
+switch : SwitchCondition
+default : Node</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2250</x>
+      <y>2440</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2600</x>
+      <y>2420</y>
+      <w>140</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>
+*SwitchCondition*
+bg=pink</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2530</x>
+      <y>2440</y>
+      <w>90</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2800</x>
+      <y>2410</y>
+      <w>200</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>*NextCommand*
+bg=pink
+
+--
+next : dict(Command, Node)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2730</x>
+      <y>2440</y>
+      <w>90</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
   </element>
 </diagram>
