@@ -209,6 +209,27 @@ Mapping of conditional queries to the next node in the activity graph. The first
 **default**
 Default node that is used if no query evaluates to true.
 
+## util.activity.switch_condition.SwitchCondition
+
+```python
+SwitchCondition(Object):
+    pass
+```
+
+Generalization object for conditions that can be used in `XORSwitchGate` nodes.
+
+## util.activity.switch_condition.type.NextCommand
+
+```python
+NextCommand(SwitchCondition):
+    next : dict(Command, Node)
+```
+
+Switches branches based on the type of command that is in the queue of the game entity.
+
+**next**
+Mapping of command types to the next node in the activity graph.
+
 ## util.animation_override.AnimationOverride
 
 ```python
