@@ -450,6 +450,42 @@ The activation message that has to be typed into the chat console.
 **changes**
 Changes to API objects.
 
+## util.command.Command
+
+```python
+Command(Object):
+    pass
+```
+
+Generalization object for commands of a game entity.
+
+## util.command.type.ApplyEffect
+
+```python
+ApplyEffect(Command):
+    pass
+```
+
+Game entity command for using the `ApplyEffect` ability.
+
+## util.command.type.Idle
+
+```python
+Idle(Command):
+    pass
+```
+
+Game entity command for using the `Idle` ability.
+
+## util.command.type.Move
+
+```python
+Move(Command):
+    pass
+```
+
+Game entity command for using the `Move` ability.
+
 ## util.container_type.SendToContainerType
 
 ```python
