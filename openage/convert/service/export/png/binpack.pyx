@@ -246,7 +246,7 @@ cdef class BinaryTreePacker(Packer):
 
         self.mapping[block.index] = (node.x, node.y, (block.width, block.height))
 
-    cdef packer_node *find_node(self, packer_node *root, unsigned int width, unsigned int height):
+    cdef packer_node *find_node(self, packer_node *root, unsigned int width, unsigned int height) noexcept:
         if root.used:
             return (self.find_node(root.right, width, height) or
                     self.find_node(root.down, width, height))
@@ -254,7 +254,7 @@ cdef class BinaryTreePacker(Packer):
         elif width <= root.width and height <= root.height:
             return root
 
-    cdef packer_node *split_node(self, packer_node *node, unsigned int width, unsigned int height):
+    cdef packer_node *split_node(self, packer_node *node, unsigned int width, unsigned int height) noexcept:
         node.used = True
 
         node.down = <packer_node *>malloc(sizeof(packer_node))
@@ -278,7 +278,7 @@ cdef class BinaryTreePacker(Packer):
         return node
 
     @cython.cdivision(True)
-    cdef packer_node *grow_node(self, unsigned int width, unsigned int height):
+    cdef packer_node *grow_node(self, unsigned int width, unsigned int height) noexcept:
         cdef bint can_grow_down = width <= self.root.width
         cdef bint can_grow_right = height <= self.root.height
         # assert can_grow_down or can_grow_right, "Bad block ordering heuristic"
@@ -300,7 +300,7 @@ cdef class BinaryTreePacker(Packer):
         else:
             return self.grow_down(width, height)
 
-    cdef packer_node *grow_right(self, unsigned int width, unsigned int height):
+    cdef packer_node *grow_right(self, unsigned int width, unsigned int height) noexcept:
         old_root = self.root
 
         self.root = <packer_node *>malloc(sizeof(packer_node))
@@ -325,7 +325,7 @@ cdef class BinaryTreePacker(Packer):
         if node != NULL:
             return self.split_node(node, width, height)
 
-    cdef packer_node *grow_down(self, unsigned int width, unsigned int height):
+    cdef packer_node *grow_down(self, unsigned int width, unsigned int height) noexcept:
         old_root = self.root
 
         self.root = <packer_node *>malloc(sizeof(packer_node))

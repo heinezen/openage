@@ -41,11 +41,11 @@ cdef class BinaryTreePacker(Packer):
 
     cdef void fit(self, sprite &block)
     cdef tuple get_packer_settings(self)
-    cdef packer_node *find_node(self, packer_node *root, unsigned int width, unsigned int height)
-    cdef packer_node *split_node(self, packer_node *node, unsigned int width, unsigned int height)
-    cdef packer_node *grow_node(self, unsigned int width, unsigned int height)
-    cdef packer_node *grow_right(self, unsigned int width, unsigned int height)
-    cdef packer_node *grow_down(self, unsigned int width, unsigned int height)
+    cdef packer_node *find_node(self, packer_node *root, unsigned int width, unsigned int height) noexcept
+    cdef packer_node *split_node(self, packer_node *node, unsigned int width, unsigned int height) noexcept
+    cdef packer_node *grow_node(self, unsigned int width, unsigned int height) noexcept
+    cdef packer_node *grow_right(self, unsigned int width, unsigned int height) noexcept
+    cdef packer_node *grow_down(self, unsigned int width, unsigned int height) noexcept
 
 cdef struct packer_node:
     unsigned int x
