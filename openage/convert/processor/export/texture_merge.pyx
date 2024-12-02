@@ -9,9 +9,11 @@ a terrain texture.
 import numpy
 from enum import Enum
 
+from libcpp.vector cimport vector
+
 from ....log import spam
 from ...entity_object.export.texture import TextureImage
-from ...service.export.png.binpack cimport Packer, DeterministicPacker, RowPacker, ColumnPacker, BinaryTreePacker, BestPacker
+from ...service.export.png.binpack cimport Packer, DeterministicPacker, RowPacker, ColumnPacker, BinaryTreePacker, BestPacker, sprite
 from ...value_object.read.media.hardcoded.texture import (MAX_TEXTURE_DIMENSION, MARGIN,
                                                           TERRAIN_ASPECT_RATIO)
 
@@ -81,7 +83,12 @@ cdef void cmerge_frames(texture, packer_type=PackerType.BINPACK, cache=None) exc
                                  RowPacker(margin=MARGIN),
                                  ColumnPacker(margin=MARGIN)])
 
-    packer.pack([(frame.width, frame.height, i) for i, frame in enumerate(frames)])
+    cdef vector[sprite] blocks
+    blocks.reserve(len(frames))
+    for i, frame in enumerate(frames):
+        blocks.push_back(sprite(frame.width, frame.height, i))
+
+    packer.pack(blocks)
 
     cdef int width = packer.width()
     cdef int height = packer.height()
@@ -143,4 +150,4 @@ cdef void cmerge_frames(texture, packer_type=PackerType.BINPACK, cache=None) exc
     if isinstance(packer, BestPacker):
         # Only generate these values if no custom packer was used
         # TODO: It might make sense to do it anyway for debugging purposes
-        texture.best_packer_hints = packer.get_mapping_hints([(frame.width, frame.height, i) for i, frame in enumerate(frames)])
+        texture.best_packer_hints = packer.get_mapping_hints(blocks)
