@@ -2,10 +2,11 @@
 
 from libcpp.memory cimport shared_ptr
 from libcpp.vector cimport vector
+from libcpp.unordered_map cimport unordered_map
 
 cdef class Packer:
     cdef unsigned int margin
-    cdef dict mapping
+    cdef unordered_map[unsigned int, position] mapping
 
     cdef void pack(self, vector[sprite] blocks)
     cdef (unsigned int, unsigned int) pos(self, int index)
@@ -60,3 +61,9 @@ cdef struct sprite:
     unsigned int width
     unsigned int height
     unsigned int index
+
+cdef struct position:
+    unsigned int x
+    unsigned int y
+    unsigned int width
+    unsigned int height

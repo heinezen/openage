@@ -34,7 +34,6 @@ cdef class Packer:
     """
     def __init__(self, int margin):
         self.margin = margin
-        self.mapping = {}
 
     cdef void pack(self, vector[sprite] &blocks):
         """
@@ -45,19 +44,20 @@ cdef class Packer:
         raise NotImplementedError
 
     cdef (unsigned int, unsigned int) pos(self, int index):
-        return self.mapping[index]
+        node = self.mapping[index]
+        return node.x, node.y
 
     cdef unsigned int width(self):
         """
         Gets the total width of the packing.
         """
-        return max(self.pos(i)[0] + block[2][0] for i, block in self.mapping.items())
+        return max(self.pos(i)[0] + block['width'] for i, block in self.mapping)
 
     cdef unsigned int height(self):
         """
         Gets the total height of the packing.
         """
-        return max(self.pos(i)[1] + block[2][1] for i, block in self.mapping.items())
+        return max(self.pos(i)[1] + block['height'] for i, block in self.mapping)
 
     cdef tuple get_packer_settings(self):
         """
@@ -127,8 +127,6 @@ cdef class RowPacker(Packer):
     """
 
     cdef void pack(self, vector[sprite] &blocks):
-        self.mapping = {}
-
         cdef unsigned int num_rows
         cdef list rows
 
@@ -146,10 +144,10 @@ cdef class RowPacker(Packer):
             x = 0
 
             for block in row:
-                self.mapping[block[2]] = (x, y)
-                x += block[0] + self.margin
+                self.mapping[block.index] = position(x, y, block.width, block.height)
+                x += block.width + self.margin
 
-            y += max(block[1] for block in row) + self.margin
+            y += max(block.height for block in row) + self.margin
 
 
 cdef class ColumnPacker(Packer):
@@ -158,8 +156,6 @@ cdef class ColumnPacker(Packer):
     """
 
     cdef void pack(self, vector[sprite] &blocks):
-        self.mapping = {}
-
         num_columns, _ = factor(len(blocks))
         columns = [[] for _ in range(num_columns)]
 
@@ -174,10 +170,10 @@ cdef class ColumnPacker(Packer):
             y = 0
 
             for block in column:
-                self.mapping[block[2]] = (x, y)
-                y += block[1] + self.margin
+                self.mapping[block.index] = position(x, y, block.width, block.height)
+                y += block.height + self.margin
 
-            x += max(block[0] for block in column) + self.margin
+            x += max(block.width for block in column) + self.margin
 
 
 cdef inline (unsigned int, unsigned int, unsigned int, unsigned int) maxside_heuristic(sprite block):
@@ -207,7 +203,6 @@ cdef class BinaryTreePacker(Packer):
         self.root = NULL
 
     cdef void pack(self, vector[sprite] &blocks):
-        self.mapping = {}
         self.root = NULL
 
         for block in sorted(blocks, key=maxside_heuristic, reverse=True):
@@ -215,7 +210,7 @@ cdef class BinaryTreePacker(Packer):
 
     cdef (unsigned int, unsigned int) pos(self, int index):
         node = self.mapping[index]
-        return node[0], node[1]
+        return node.x, node.y
 
     cdef tuple get_packer_settings(self):
         return (self.margin,)
@@ -244,7 +239,7 @@ cdef class BinaryTreePacker(Packer):
             node = self.grow_node(block.width + self.margin,
                                   block.height + self.margin)
 
-        self.mapping[block.index] = (node.x, node.y, (block.width, block.height))
+        self.mapping[block.index] = position(node.x, node.y, block.width, block.height)
 
     cdef packer_node *find_node(self, packer_node *root, unsigned int width, unsigned int height) noexcept:
         if root.used:
