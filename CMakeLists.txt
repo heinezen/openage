@@ -1,4 +1,4 @@
-# Copyright 2013-2023 the openage authors. See copying.md for legal info.
+# Copyright 2013-2025 the openage authors. See copying.md for legal info.
 
 # >=3.16 finding numpy with the findpython3 module
 cmake_minimum_required(VERSION 3.16)
@@ -34,7 +34,7 @@ If it doesn't, consider reporting the issue, or ask for help:
 project(openage CXX)
 
 # C++ standard requirement
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Python and Cython requirements
